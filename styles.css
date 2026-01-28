@@ -1,0 +1,51 @@
+button {
+    flex-grow: 1;
+}
+
+div {
+    border: 2px solid black;
+    text-align: center;
+    margin: 2px;
+}
+
+div .child-left {
+    display: flex;
+    border: 0px none;
+    margin: 0px;
+    flex-direction: column;
+    flex-grow: 3;
+}
+
+div .child-right {
+    flex-grow: 1;
+}
+
+#input-container {
+    border: none;
+    display: flex;
+    flex-direction: row;
+}
+
+div p {
+    text-align: center;
+    vertical-align: middle;
+}
+
+div #outer {
+    height: 500px;
+    line-height: 500px;
+}
+
+div .parent {
+    display: flex;
+    border: 0px none;
+    margin: 0px;
+    flex-direction: row;
+}
+
+input {
+    flex-grow: 4;
+    margin: 2px;
+}
+
+

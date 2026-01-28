@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>RecipeBlock</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div id="input-container">
+        <input id="recipe-input" placeholder="enter recipe code" >
+        <button id="refresh-button" >Refresh</button>
+    </div>
+    <div id="root"></div>
+    <script>
+        recipe = "bake( divide( mix(chocolate, coconut, pecans, mix(eggs, whisk(flour, baking powder, baking soda, salt), cream(butter, sugars))) ) )";
+
+        function get_func_dom(func_name) {
+            // create parent, left-child, and right-child divs
+            var parent = document.createElement("div");
+            var child_left = document.createElement("div");
+            var child_right = document.createElement("div");
+            var child_right_text = document.createElement("p");
+            // set attributes for these divs
+            parent.setAttribute("class", "parent");
+            child_left.setAttribute("class", "child-left");
+            child_right.setAttribute("class", "child-right");
+            child_right.setAttribute("id", func_name);
+            child_right_text.textContent = func_name;
+            // append divs to parent
+            child_right.appendChild(child_right_text);
+            parent.appendChild(child_left);
+            parent.appendChild(child_right);
+
+            return parent;
+        }
+
+        /**
+         * Parses a list of parameters, some of which may be functions
+         */
+        function parse_params(src, func_name) {
+            var args = [];
+            var curr_arg = ""
+            var curr_pos = 0
+
+            // get dom structure for this function and its new parameters
+            var dom = get_func_dom(func_name);
+            var params = dom.getElementsByClassName("child-left")[0];
+
+            while (curr_pos < src.length) {
+                // if chracter is ','
+                if (src.charAt(curr_pos) == ',') {
+                    // if curr_arg is empty, throw an error
+                    if (!curr_arg) {
+                        throw new Error("expected argument before ','");
+                    }
+                    // push curr_arg onto args
+                    args.push(curr_arg);
+                    // reset curr_arg
+                    curr_arg = "";
+                }
+                // if character is '(', parse function starting at curr_pos - curr_arg.length
+                else if (src.charAt(curr_pos) == '(') {
+                    var parsed = parse_func(src.substr(curr_pos - curr_arg.length));
+                    // set curr_pos to return value from function
+                    curr_pos += parsed.end - curr_arg.length;
+                    // parse past the ensuing comma delimiter
+                    curr_pos += src.substr(curr_pos).indexOf(",") + 1;
+                    // add parsed dom to parameters dom
+                    params.appendChild(parsed.dom);
+                    // reset curr_arg
+                    curr_arg = "";
+                }
+                // else add character to arg
+                else {
+                    curr_arg += src.charAt(curr_pos);
+                }
+
+                curr_pos++;
+            }
+
+            // push last arg onto args
+            if (curr_arg)
+                args.push(curr_arg);
+
+            // construct parameters side of function dom
+            for (var i = 0; i < args.length; i++) {
+                // build a div for each argument and append it to params
+                var param = document.createElement("div");
+
+                var param_name = document.createElement("p");
+                param_name.textContent = args[i];
+                param.appendChild(param_name);
+                params.appendChild(param);
+            }
+            return dom;
+        }
+
+        function parse_func(src) {
+            //// get function ////
+            var verb = src.substr(0, src.indexOf("("));
+            //// get parameters ////
+            var start_pos = src.indexOf("(") + 1;
+            // end_pos starts just after the '('
+            var end_pos = start_pos;
+            // keep track of how many nested functions we've gone through
+            var level = -1
+            while (end_pos < src.length) {
+                // if '(', go down a level
+                if (src.charAt(end_pos) == '(') level--;
+                // if ')', go up a level
+                if (src.charAt(end_pos) == ')') level++;
+                // if we've just climbed out of the original function,
+                // end_pos is at the closing ')'
+                if (level == 0) break;
+
+                end_pos++;
+            }
+            // handle unclosed parenthesis
+            if (level < 0) throw new Error("Unclosed parenthesis");
+
+            //// get function dom by recursing, passing arguments to parse_params ////
+            var dom = parse_params(src.substr(start_pos, end_pos - start_pos), verb);
+            // return end_pos and parent
+            return { end: end_pos + 1, dom: dom };
+        }
+        
+        function rebuild_recipe() {
+            recipe = document.getElementById("recipe-input").value
+            var dom = parse_func(recipe).dom;
+            document.getElementById("root").innerHTML = "";
+            document.getElementById("root").appendChild(dom);
+        }
+
+        function on_recipe_change(e) {
+            recipe = e.target.Value;
+            rebuild_recipe();
+        }
+
+
+        document.getElementById("recipe-input").addEventListener("input", on_recipe_change)
+        document.getElementById("refresh-button").addEventListener("click", on_recipe_change)
+
+    </script>
+</body>
+
+</html>
