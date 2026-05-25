@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Flash Card</title>
+<link rel="stylesheet" href="./flash-cards.css"/>
+<style>
+/* Drawer toggle button */
+#drawerToggle {
+    position: fixed;
+    top: 20px;
+    right: 320px; /* width of drawer + margin */
+    z-index: 1000;
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+<div id="stats">Correct: <span id="correctCount">0</span>, Incorrect: <span id="incorrectCount">0</span></div>
+<button id="drawerToggle" title="Open JSON drawer">JSON</button>
+<div id="card-container">
+  <div id="flashcard" class="card" tabindex="0">
+    <div class="face front"></div>
+    <div class="face back"></div>
+  </div>
+  <div id="buttons" style="display:none; margin-top:10px; text-align:center;">
+    <button id="correctBtn" class="action correct">Correct</button>
+    <button id="incorrectBtn" class="action incorrect">Incorrect</button>
+  </div>
+</div>
+
+<!-- Drawer for JSON input -->
+<div id="drawer" class="drawer">
+  <h3 style="margin:10px;">Flashcard JSON</h3>
+  <textarea id="jsonInput" style="width:95%; height:200px; margin:0 10px;"></textarea>
+  <div style="text-align:center; margin-top:10px;">
+    <button id="submitBtn">Submit</button>
+  </div>
+</div>
+
+<script src="./flash-cards.js"></script>
+</body>
+</html>

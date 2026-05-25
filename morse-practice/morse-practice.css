@@ -1,0 +1,22 @@
+/* Basic styling for Morse Code Practice page */
+body {
+    font-family: Arial, sans-serif;
+    margin: 2rem;
+    line-height: 1.5;
+}
+#instructions {
+    background-color:#f9f9f9;
+    padding:10px;
+    border-radius:5px;
+    margin-bottom:1rem;
+}
+#counter {margin-top:0.5rem; font-weight:bold;}
+.message {font-size:1.2em; color:#333;}
+#morseInput {
+    background-color:#eee;
+    padding:10px;
+    border-radius:4px;
+    min-height:30px;
+    white-space:pre-wrap;
+}
+button#submitBtn{margin-top:0.5rem;padding:0.5rem 1rem;font-size:1em;}

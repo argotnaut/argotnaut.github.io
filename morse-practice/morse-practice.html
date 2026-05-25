@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Morse Code Practice</title>
+    <link rel="stylesheet" href="./morse-practice.css" />
+</head>
+
+<body>
+    <h1>Morse Code Practice</h1>
+    <div id="instructions">Press the space bar to input Morse code.
+
+        • Short press (less than 300 ms) = dot (.)
+        • Long press (more than 300 ms) = dash (-)
+        • Pause longer than 800 ms between presses separates letters.
+        • Press Enter or click Submit when finished.</div>
+    <div id="counter">Correct: <span id="score">0</span></div>
+    <h2>Message to reproduce:</h2>
+    <p id="target" class="message"></p>
+    <h3>Your Morse input:</h3>
+    <pre id="morseInput" class="morse">(press space bar)</pre>
+    <button id="submitBtn">Submit</button>
+    <button id="clearBtn">Clear</button>
+    <script src="./morse-practice.js"></script>
+</body>
+
+</html>
