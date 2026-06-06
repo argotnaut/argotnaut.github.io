@@ -26,7 +26,13 @@ const submitBtn = document.getElementById('submitBtn');
 
 if (drawer && drawerToggle) {
     drawerToggle.addEventListener('click', () => {
-        drawer.classList.toggle('open');
+        if (drawer.classList.contains('open')) {
+            drawer.classList.remove('open');
+            drawer.classList.add('closed');
+        } else {
+            drawer.classList.remove('closed');
+            drawer.classList.add('open');
+        }
     });
 }
 
@@ -63,11 +69,12 @@ if (submitBtn) {
     });
 }
 
-function showCard(index) {
+async function showCard(index) {
+    cardEl.classList.remove('flipped');
+    await new Promise(r => setTimeout(r, 250)) // 250 is half the duration of the linear 'flip' transition
     const card = flashcards[index];
     frontEl.textContent = card.front;
     backEl.textContent = card.back;
-    cardEl.classList.remove('flipped');
     buttonsContainer.style.display = 'none';
 }
 
@@ -85,6 +92,8 @@ cardEl.addEventListener('click', () => {
 
 // Space bar to flip
 document.addEventListener('keydown', (e) => {
+    const active = document.activeElement;
+    if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
     if (e.code === 'Space' && !cardEl.classList.contains('flipped')) {
         cardEl.click();
     }
@@ -104,3 +113,8 @@ incorrectBtn.addEventListener('click', () => {
 
 // Init
 showCard(currentIndex);
+
+// Initialize JSON textarea with default cards
+if (jsonInput) {
+    jsonInput.value = JSON.stringify(defaultFlashcards, null, 2);
+}
