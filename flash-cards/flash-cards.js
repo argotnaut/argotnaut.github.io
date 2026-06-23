@@ -207,6 +207,23 @@ cardEl.addEventListener("click", (e) => {
 });
 
 // Space bar to flip
+
+document.addEventListener("keydown", (e) => {
+  const active = document.activeElement;
+  if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA"))
+    return;
+  if (e.key === "c") {
+    correctCount++;
+    correctCountEl.textContent = correctCount;
+    nextCard();
+  } else if (e.key === "i") {
+    incorrectCount++;
+    incorrectCountEl.textContent = incorrectCount;
+    nextCard();
+  }
+});
+
+// Space bar to flip
 document.addEventListener("keydown", (e) => {
   const active = document.activeElement;
   if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA"))
