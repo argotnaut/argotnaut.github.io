@@ -17,7 +17,14 @@
   <div id="buttons" style="display:none; margin-top:10px; text-align:center;">
     <button id="correctBtn" class="action correct">Correct</button>
     <button id="incorrectBtn" class="action incorrect">Incorrect</button>
+</div>
+
+  <div id="inputContainer" style="display:none; margin-top:10px; text-align:center;">
+    <input type="text" id="answerInput" style="width:80%; padding:5px; font-size:1rem;" />
+    <button id="answerSubmitBtn">Submit</button>
   </div>
+  <div id="answerIcon" style="display:none; margin-top:10px; text-align:center; font-size:2rem;">✓</div>
+
 </div>
 
 <!-- Drawer for JSON input -->
@@ -25,6 +32,7 @@
   <div id="drawerToggle" class="hamburger" title="Open JSON drawer">☰</div>
   <div id="drawerContent"><h3 style="margin:10px 10px 10px 50px;">Flashcard JSON</h3>
   <textarea id="jsonInput" style="width:95%; height:200px; margin:0 10px;"></textarea>
+  
   <div style="text-align:center; margin-top:10px;">
     <button id="submitBtn">Submit</button>
   </div>
