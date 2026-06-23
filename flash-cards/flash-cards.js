@@ -183,7 +183,7 @@ function nextCard() {
 function showInput() {
   inputContainer.style.display = "block";
   hideAnswerButtons();
-  inputContainer.focus();
+  answerInput.focus();
 }
 
 function currentCardIsFlipped() {
