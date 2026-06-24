@@ -12,6 +12,27 @@ body {
     min-height: 100vh;
 }
 
+/* Light mode overrides */
+body.light-mode {
+    background: #fff;
+    color: #000;
+}
+
+body.light-mode .front {
+    background: #fff;
+    color: #000;
+}
+
+body.light-mode .back {
+    background: #f9f9f9;
+    color: #333;
+}
+
+body.light-mode .action:not(.correct):not(.incorrect) {
+    background: #eee;
+    color: #000;
+}
+
 #card-container {
     display: flex;
     flex-direction: column;
@@ -161,4 +182,19 @@ body {
 #drawer h3 {
     margin-top: 10px;
     font-size: 1.2rem;
+}
+
+/* Theme adjustments for drawer and stats */
+body.light-mode .drawer {
+    background: #fff;
+    color: #000;
+}
+
+body.light-mode #stats {
+    color: #000;
+}
+
+body.light-mode #drawer h3,
+body.light-mode #settingsMenu label {
+    color: #000;
 }

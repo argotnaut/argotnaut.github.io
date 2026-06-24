@@ -37,6 +37,8 @@ let correctCount = 0;
 let incorrectCount = 0;
 let currentCard = null;
 
+let orderMode = 'order'; // default ordering
+
 // Drawer elements and toggle logic
 const drawer = document.getElementById("drawer");
 const drawerToggle = document.getElementById("drawerToggle");
@@ -52,6 +54,31 @@ if (drawer && drawerToggle) {
       drawer.classList.remove("closed");
       drawer.classList.add("open");
     }
+  });
+}
+
+// Dark mode toggle
+const darkModeToggle = document.getElementById('darkModeToggle');
+if (darkModeToggle) {
+  const savedDark = localStorage.getItem('darkMode') === 'true';
+  darkModeToggle.checked = savedDark;
+  if (savedDark) document.body.classList.add('light-mode');
+  darkModeToggle.addEventListener('change', () => {
+    const enabled = darkModeToggle.checked;
+    if (enabled) document.body.classList.add('light-mode'); else document.body.classList.remove('light-mode');
+    localStorage.setItem('darkMode', enabled);
+  });
+}
+
+// Order mode selection
+const orderSelect = document.getElementById('orderSelect');
+if (orderSelect) {
+  const savedOrder = localStorage.getItem('orderMode') || 'order';
+  orderSelect.value = savedOrder;
+  orderMode = savedOrder;
+  orderSelect.addEventListener('change', () => {
+    orderMode = orderSelect.value;
+    localStorage.setItem('orderMode', orderMode);
   });
 }
 
@@ -176,7 +203,15 @@ async function showCard(index) {
 }
 
 function nextCard() {
-  currentIndex = (currentIndex + 1) % flashcards.length;
+  if (orderMode === "order") {
+    currentIndex = (currentIndex + 1) % flashcards.length;
+  } else {
+    let newIndex = Math.floor(Math.random() * flashcards.length);
+    if (orderMode === "other" && newIndex === currentIndex) {
+      newIndex = (newIndex + 1) % flashcards.length;
+    }
+    currentIndex = newIndex;
+  }
   showCard(currentIndex);
 }
 
