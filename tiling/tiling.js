@@ -6,10 +6,10 @@ function getStoredItem(key, defaultVal) {
   const stored = localStorage.getItem(key);
   return stored ? stored : defaultVal;
 }
-let color1 = getStoredItem("color1", "#5cb6ff");
-let color2 = getStoredItem("color2", "#71d9ff");
+let color1 = getStoredItem("color1", "#a938ff");
+let color2 = getStoredItem("color2", "#bd71ff");
 // Current shape: 'triangles' or 'quarters'
-let currentShape = getStoredItem("shape", "quarters");
+let currentShape = getStoredItem("shape", "triangles");
 
 
 let tileSize = 20; // default tile size
