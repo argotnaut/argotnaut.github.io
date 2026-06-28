@@ -1,5 +1,58 @@
-button {
-    flex-grow: 1;
+/* Dark theme styling for Recipe Visualizer */
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #111;
+  color: #eee;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+#input-container {
+  display: flex;
+  width: 80%;
+  max-width: 600px;
+  margin-bottom: 1rem;
+}
+
+#recipe-input {
+  flex: 1;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 2px solid #444;
+  border-right: none;
+  border-radius: 4px 0 0 4px;
+  background: #222;
+  color: #eee;
+}
+
+#refresh-button {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  background: #444;
+  color: #eee;
+  border: 2px solid #444;
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+  transition: background .3s;
+}
+
+#refresh-button:hover {
+  background: #555;
+}
+
+#root {
+  width: 80%;
+  max-width: 800px;
+  background: #e5e5e5;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,.5);
 }
 
 div {
@@ -19,12 +72,6 @@ div .child-left {
 
 div .child-right {
     flex-grow: 1;
-}
-
-#input-container {
-    border: none;
-    display: flex;
-    flex-direction: row;
 }
 
 div p {
@@ -48,10 +95,3 @@ div .parent {
     margin: 0px;
     flex-direction: row;
 }
-
-input {
-    flex-grow: 4;
-    margin: 2px;
-}
-
-
