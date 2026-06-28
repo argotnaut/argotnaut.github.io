@@ -1,12 +1,18 @@
 // Draw a random Truchet tiling on the canvas
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-// Colors used for the two halves of each tile
-let color1 = "#5cb6ff";
-let color2 = "#71d9ff";
+// Retrieve stored values or use defaults
+function getStoredItem(key, defaultVal) {
+  const stored = localStorage.getItem(key);
+  return stored ? stored : defaultVal;
+}
+let color1 = getStoredItem("color1", "#5cb6ff");
+let color2 = getStoredItem("color2", "#71d9ff");
+// Current shape: 'triangles' or 'quarters'
+let currentShape = getStoredItem("shape", "quarters");
 
 
-let tileSize = 50; // default tile size
+let tileSize = 20; // default tile size
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
@@ -113,20 +119,26 @@ function drawTiling() {
   const cols = Math.ceil(canvas.width / tileSize);
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-      // drawTriangles(i, j);
-      drawQuarterCircles(i, j);
+      if (currentShape === "triangles") {
+        drawTriangles(i, j);
+      } else {
+        drawQuarterCircles(i, j);
+      }
     }
   }
 }
 
-document.getElementById("color1").setAttribute("value", color1)
+document.getElementById("color1").value = color1;
+document.getElementById("shape").value = currentShape;
 document.getElementById("color1").addEventListener("input", (e) => {
   color1 = e.target.value;
+  localStorage.setItem("color1", color1);
   drawTiling();
 });
-document.getElementById("color2").setAttribute("value", color2)
+document.getElementById("color2").value = color2;
 document.getElementById("color2").addEventListener("input", (e) => {
   color2 = e.target.value;
+  localStorage.setItem("color2", color2);
   drawTiling();
 });
 document.getElementById("tileSize").addEventListener("input", (e) => {
@@ -135,6 +147,13 @@ document.getElementById("tileSize").addEventListener("input", (e) => {
     tileSize = val;
     resizeCanvas();
   }
+});
+
+// Shape selector
+document.getElementById("shape").addEventListener("change", (e) => {
+  currentShape = e.target.value;
+  localStorage.setItem("shape", currentShape);
+  drawTiling();
 });
 
 window.addEventListener("resize", resizeCanvas);
