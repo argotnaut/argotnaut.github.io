@@ -297,7 +297,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const val = input.value;
     preview.style.backgroundColor = val;
     preview.textContent = val.toUpperCase();
-    rotateColor(val.toUpperCase());
   }
 
   input.addEventListener("input", update);
@@ -358,7 +357,7 @@ function multiply(a, b) {
 
 function vectorToColor(input) {
   function toPaddedHex(n) {
-    n = Math.min(Math.floor(n*256),255) // a more accurate alternative to Math.Round
+    n = Math.min(Math.round(n),255)
     return (n < 16) ? "0" + n.toString(16) : n.toString(16);
   }
   return "#"+
@@ -379,9 +378,14 @@ function rotateColor(input) {
   console.log("GetDiagonal unit vector:")
   console.log(diagVector.normalized())
   console.log("rotate test vector around diagonal unit vector:")
-  console.log((new Vector(1, 0, 0)).rotateAroundVector(2*Math.PI/3, diagVector))
+  console.log((new Vector(1, 0, 0)).rotateAroundVector(Math.PI/3, diagVector))
 
-  let rotatedColorVector = inputVector.rotateAroundVector(2*Math.PI/3, diagVector)
+  let rotatedColorVector = inputVector.rotateAroundVector(Math.PI/3, diagVector)
+  rotatedColorVector = new Vector(
+    Math.min(255, rotatedColorVector.x),
+    Math.min(255, rotatedColorVector.y),
+    Math.min(255, rotatedColorVector.z),
+  )
   console.log(input)
   console.log(inputVector)
   console.log(rotatedColorVector)
