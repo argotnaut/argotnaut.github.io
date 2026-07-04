@@ -293,23 +293,23 @@ class Matrix3D {
 document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("colorInput");
   const preview = document.getElementById("preview");
-  function update() {
-    const val = input.value;
-    preview.style.backgroundColor = val;
-    preview.textContent = val.toUpperCase();
-    baseColor = val.toUpperCase();
-    recalculateColors()
-  }
-
-  input.addEventListener("input", update);
-  update();
-
   schemeSelect = document.getElementById('schemeSelect');
   if (schemeSelect) {
     schemeSelect.addEventListener('change', () => {
       recalculateColors();
     });
   }
+
+  function update() {
+    const val = input.value;
+    preview.style.backgroundColor = val;
+    preview.textContent = val.toUpperCase();
+    baseColor = val.toUpperCase();
+    recalculateColors();
+  }
+
+  input.addEventListener("input", update);
+  update();
 });
 
 /**
@@ -366,7 +366,7 @@ function multiply(a, b) {
 
 function vectorToColor(input) {
   function toPaddedHex(n) {
-    n = Math.min(Math.round(n),255)
+    n = Math.max(0, Math.min(Math.round(n),255))
     return (n < 16) ? "0" + n.toString(16) : n.toString(16);
   }
   return "#"+
@@ -405,7 +405,7 @@ function getComplimentaryColors(input) {
 
 function getAnalogousColors(input) {
   let colors = [input]
-  let spreadAngle = Math.PI / 4
+  let spreadAngle = Math.PI / 5
   colors.push(rotateColor(input, spreadAngle))
   colors.push(rotateColor(input, -spreadAngle))
   return colors
@@ -495,10 +495,6 @@ function recalculateColors() {
       squares[i].style.backgroundColor = color;
       squares[i].textContent = color.toUpperCase();
     }
-  }
-
-  if (schemeSelect) {
-    schemeSelect.addEventListener('change', updateSchemeColors);
   }
 
   // Initial update
