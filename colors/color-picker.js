@@ -290,6 +290,8 @@ class Matrix3D {
   }
 }
 
+var baseColor = "#FF0000"
+
 document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("colorInput");
   const preview = document.getElementById("preview");
@@ -297,10 +299,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const val = input.value;
     preview.style.backgroundColor = val;
     preview.textContent = val.toUpperCase();
+    baseColor = val.toUpperCase();
+    recalculateColors()
   }
 
   input.addEventListener("input", update);
   update();
+
+  const schemeSelect = document.getElementById('schemeSelect');
+  if (schemeSelect) {
+    schemeSelect.addEventListener('change', e => {
+      console.log('Selected scheme:', e.target.value);
+    });
+  }
 });
 
 /**
@@ -366,28 +377,123 @@ function vectorToColor(input) {
     toPaddedHex(input.z)
 }
 
-function rotateColor(input) {
+function vectorFromColorString(input) {
   input = input.replaceAll("#", "");
-  let inputVector = new Vector(
+  return new Vector(
     Number("0x" + input.substr(0, 2)),
     Number("0x" + input.substr(2, 2)),
     Number("0x" + input.substr(4, 2)),
   );
+}
+
+function rotateColor(input, theta) {
+  let inputVector = vectorFromColorString(input)
   const diagVector = new Vector(1, 1, 1)
 
-  console.log("GetDiagonal unit vector:")
-  console.log(diagVector.normalized())
-  console.log("rotate test vector around diagonal unit vector:")
-  console.log((new Vector(1, 0, 0)).rotateAroundVector(Math.PI/3, diagVector))
-
-  let rotatedColorVector = inputVector.rotateAroundVector(Math.PI/3, diagVector)
+  let rotatedColorVector = inputVector.rotateAroundVector(theta, diagVector)
   rotatedColorVector = new Vector(
     Math.min(255, rotatedColorVector.x),
     Math.min(255, rotatedColorVector.y),
     Math.min(255, rotatedColorVector.z),
   )
-  console.log(input)
-  console.log(inputVector)
-  console.log(rotatedColorVector)
-  console.log(vectorToColor(rotatedColorVector));
+  return vectorToColor(rotatedColorVector)
 }
+
+function getComplimentaryColors(input) {
+  let colors = [input]
+  colors.push(rotateColor(input, Math.PI))
+  return colors
+}
+
+function getAnalogousColors(input) {
+  let colors = [input]
+  let spreadAngle = Math.PI / 4
+  colors.push(rotateColor(input, spreadAngle))
+  colors.push(rotateColor(input, -spreadAngle))
+  return colors
+}
+
+function getMonochromaticColors(input) {
+  let inputVector = vectorFromColorString(input)
+  let colors = [input]
+  for (let i = 0; i < 3; i++) {
+    inputVector = inputVector.multiplyConstant(0.8)
+    colors.push(vectorToColor(inputVector))
+  }
+  return colors
+}
+
+function getSplitComplimentaryColors(input) {
+  let colors = [input]
+  let spreadAngle = Math.PI / 6
+  colors.push(rotateColor(input, Math.PI + spreadAngle))
+  colors.push(rotateColor(input, Math.PI - spreadAngle))
+  return colors
+}
+
+function getTriadicColors(input) {
+  let colors = [input]
+  let spreadAngle = 2*Math.PI / 3
+  colors.push(rotateColor(input, spreadAngle))
+  colors.push(rotateColor(input, -spreadAngle))
+  return colors
+}
+
+function getSquareColors(input) {
+  let colors = [input]
+  let spreadAngle = Math.PI / 2
+  colors.push(rotateColor(input, spreadAngle))
+  colors.push(rotateColor(input, 2*spreadAngle))
+  colors.push(rotateColor(input, 3*spreadAngle))
+  return colors
+}
+
+// Create scheme color squares and update on selection
+function recalculateColors() {
+  const schemeColorsContainer = document.getElementById('schemeColors');
+  const numSquares = 4;
+  const squares = [];
+  for (let i = 0; i < numSquares; i++) {
+    const div = document.createElement('div');
+    div.className = 'scheme-color';
+    schemeColorsContainer.appendChild(div);
+    squares.push(div);
+  }
+
+  function updateSchemeColors() {
+    const scheme = schemeSelect.value;
+    let colors;
+    switch (scheme) {
+      case 'complimentary':
+        colors = getComplimentaryColors(baseColor);
+        break;
+      case 'analogous':
+        colors = getAnalogousColors(baseColor);
+        break;
+      case 'monochromatic':
+        colors = getMonochromaticColors(baseColor);
+        break;
+      case 'split':
+        colors = getSplitComplimentaryColors(baseColor);
+        break;
+      case 'triadic':
+        colors = getTriadicColors(baseColor);
+        break;
+      case 'square':
+        colors = getSquareColors(baseColor);
+        break;
+      default:
+        colors = [baseColor];
+    }
+    for (let i = 0; i < squares.length; i++) {
+      const color = colors[i] || '#000000';
+      squares[i].style.backgroundColor = color;
+      squares[i].textContent = color.toUpperCase();
+    }
+  }
+
+  schemeSelect.addEventListener('change', updateSchemeColors);
+  // initial update
+  updateSchemeColors();
+}
+

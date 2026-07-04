@@ -22,3 +22,16 @@ body {
   font-weight: bold;
   font-family: Arial, sans-serif;
 }
+
+.scheme-color {
+  width: 100px;
+  height: 100px;
+  border: 1px solid #000;
+  margin: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+}
