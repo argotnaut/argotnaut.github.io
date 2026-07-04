@@ -290,8 +290,6 @@ class Matrix3D {
   }
 }
 
-var baseColor = "#FF0000"
-
 document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("colorInput");
   const preview = document.getElementById("preview");
@@ -306,10 +304,10 @@ document.addEventListener("DOMContentLoaded", () => {
   input.addEventListener("input", update);
   update();
 
-  const schemeSelect = document.getElementById('schemeSelect');
+  schemeSelect = document.getElementById('schemeSelect');
   if (schemeSelect) {
-    schemeSelect.addEventListener('change', e => {
-      console.log('Selected scheme:', e.target.value);
+    schemeSelect.addEventListener('change', () => {
+      recalculateColors();
     });
   }
 });
@@ -448,20 +446,27 @@ function getSquareColors(input) {
   return colors
 }
 
+// Global variables for scheme squares
+let schemeColorsContainer = null;
+let squares = [];
+let schemeSelect = null;
+let baseColor = '#ff0000';
+
 // Create scheme color squares and update on selection
 function recalculateColors() {
-  const schemeColorsContainer = document.getElementById('schemeColors');
-  const numSquares = 4;
-  const squares = [];
-  for (let i = 0; i < numSquares; i++) {
-    const div = document.createElement('div');
-    div.className = 'scheme-color';
-    schemeColorsContainer.appendChild(div);
-    squares.push(div);
+  if (!schemeColorsContainer) {
+    schemeColorsContainer = document.getElementById('schemeColors');
+    const numSquares = 4;
+    for (let i = 0; i < numSquares; i++) {
+      const div = document.createElement('div');
+      div.className = 'scheme-color';
+      schemeColorsContainer.appendChild(div);
+      squares.push(div);
+    }
   }
 
   function updateSchemeColors() {
-    const scheme = schemeSelect.value;
+    const scheme = schemeSelect ? schemeSelect.value : 'complimentary';
     let colors;
     switch (scheme) {
       case 'complimentary':
@@ -492,8 +497,11 @@ function recalculateColors() {
     }
   }
 
-  schemeSelect.addEventListener('change', updateSchemeColors);
-  // initial update
+  if (schemeSelect) {
+    schemeSelect.addEventListener('change', updateSchemeColors);
+  }
+
+  // Initial update
   updateSchemeColors();
 }
 
