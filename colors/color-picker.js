@@ -293,12 +293,6 @@ class Matrix3D {
 document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("colorInput");
   const preview = document.getElementById("preview");
-  schemeSelect = document.getElementById('schemeSelect');
-  if (schemeSelect) {
-    schemeSelect.addEventListener('change', () => {
-      recalculateColors();
-    });
-  }
 
   function update() {
     const val = input.value;
@@ -423,7 +417,7 @@ function getMonochromaticColors(input) {
 
 function getSplitComplimentaryColors(input) {
   let colors = [input]
-  let spreadAngle = Math.PI / 6
+  let spreadAngle = Math.PI / 12
   colors.push(rotateColor(input, Math.PI + spreadAngle))
   colors.push(rotateColor(input, Math.PI - spreadAngle))
   return colors
@@ -446,58 +440,57 @@ function getSquareColors(input) {
   return colors
 }
 
-// Global variables for scheme squares
-let schemeColorsContainer = null;
-let squares = [];
-let schemeSelect = null;
+const schemeConfigs = [
+  {name: 'Complimentary', func: getComplimentaryColors},
+  {name: 'Analogous', func: getAnalogousColors},
+  {name: 'Monochromatic', func: getMonochromaticColors},
+  {name: 'Split', func: getSplitComplimentaryColors},
+  {name: 'Triadic', func: getTriadicColors},
+  {name: 'Square', func: getSquareColors}
+];
+let schemeGroupsContainer = null;
+const schemeSquaresMap = {};
 let baseColor = '#ff0000';
 
-// Create scheme color squares and update on selection
 function recalculateColors() {
-  if (!schemeColorsContainer) {
-    schemeColorsContainer = document.getElementById('schemeColors');
-    const numSquares = 4;
-    for (let i = 0; i < numSquares; i++) {
-      const div = document.createElement('div');
-      div.className = 'scheme-color';
-      schemeColorsContainer.appendChild(div);
-      squares.push(div);
-    }
+  if (!schemeGroupsContainer) {
+    schemeGroupsContainer = document.getElementById('schemeGroups');
+    schemeConfigs.forEach(cfg => {
+      const groupDiv = document.createElement('div');
+      groupDiv.className = 'scheme-group';
+      const label = document.createElement('div');
+      label.className = 'scheme-label';
+      label.textContent = cfg.name;
+      groupDiv.appendChild(label);
+      const squaresDiv = document.createElement('div');
+      squaresDiv.className = 'scheme-squares';
+      const squares = [];
+      const colorsCount = 4;
+      for (let i = 0; i < colorsCount; i++) {
+        const div = document.createElement('div');
+        div.className = 'scheme-color';
+        squaresDiv.appendChild(div);
+        squares.push(div);
+      }
+      groupDiv.appendChild(squaresDiv);
+      schemeGroupsContainer.appendChild(groupDiv);
+      schemeSquaresMap[cfg.name] = squares;
+    });
   }
 
-  function updateSchemeColors() {
-    const scheme = schemeSelect ? schemeSelect.value : 'complimentary';
-    let colors;
-    switch (scheme) {
-      case 'complimentary':
-        colors = getComplimentaryColors(baseColor);
-        break;
-      case 'analogous':
-        colors = getAnalogousColors(baseColor);
-        break;
-      case 'monochromatic':
-        colors = getMonochromaticColors(baseColor);
-        break;
-      case 'split':
-        colors = getSplitComplimentaryColors(baseColor);
-        break;
-      case 'triadic':
-        colors = getTriadicColors(baseColor);
-        break;
-      case 'square':
-        colors = getSquareColors(baseColor);
-        break;
-      default:
-        colors = [baseColor];
-    }
-    for (let i = 0; i < squares.length; i++) {
-      const color = colors[i] || '#000000';
-      squares[i].style.backgroundColor = color;
-      squares[i].textContent = color.toUpperCase();
-    }
-  }
-
-  // Initial update
-  updateSchemeColors();
+  schemeConfigs.forEach(cfg => {
+    const colors = cfg.func(baseColor);
+    const squares = schemeSquaresMap[cfg.name];
+    squares.forEach((sq, idx) => {
+      if (idx < colors.length) {
+        const color = colors[idx];
+        sq.style.backgroundColor = color;
+        sq.textContent = color.toUpperCase();
+        sq.style.display = '';
+      } else {
+        sq.style.display = 'none';
+      }
+    });
+  });
 }
 
