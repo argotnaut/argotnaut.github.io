@@ -24,10 +24,10 @@ body {
 }
 
 .scheme-color {
-  width: 100px;
-  height: 100px;
+  flex: 1;
+  height: 60px;
+  min-width: 0;
   border: 1px solid #000;
-  margin: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,6 +47,8 @@ body {
   flex-direction: column;
   align-items: center;
   margin-bottom: 20px;
+  margin-top: 20px;
+  width: 600px;
 }
 
 .scheme-label {
@@ -57,5 +59,10 @@ body {
 .scheme-squares {
   display: flex;
   flex-direction: row;
-  gap: 5px;
+  gap: 0;
+  width: 100%;
+}
+
+#schemeGroups {
+  width: 600px;
 }
