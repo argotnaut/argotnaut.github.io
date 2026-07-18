@@ -115,6 +115,12 @@ body.light-mode .action:not(.correct):not(.incorrect) {
     color: white;
 }
 
+/* Bucket selector active button */
+#bucketSelector button.active {
+    background: #555;
+    color: #fff;
+}
+
 /* Stats */
 #stats {
     position: absolute;
@@ -197,4 +203,10 @@ body.light-mode #stats {
 body.light-mode #drawer h3,
 body.light-mode #settingsMenu label {
     color: #000;
+}
+
+#bucketSelector {
+  text-align: center;
+  margin-top: 40px;
+  position: relative;
 }

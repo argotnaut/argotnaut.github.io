@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Star Polygon Notation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="star-polygons.css" />
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <div id="controls">
+      <label
+        >Number of vertices: <input type="number" inputmode="numeric" id="points" min="3" value="11"
+      /></label>
+      <label
+        >Turning number: <input type="number" inputmode="numeric" id="hops" min="1" value="3"
+      /></label>
+    </div>
+    <script src="star-polygons.js"></script>
+    <script>
+      window.addEventListener("resize", resizeCanvas);
+      window.addEventListener("load", resizeCanvas);
+      document.getElementById("points").addEventListener("input", (e) => {
+        resizeCanvas();
+      });
+      document.getElementById("hops").addEventListener("input", (e) => {
+        resizeCanvas();
+      });
+    </script>
+  </body>
+</html>

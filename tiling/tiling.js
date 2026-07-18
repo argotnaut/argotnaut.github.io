@@ -1,23 +1,10 @@
-// Draw a random Truchet tiling on the canvas
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-// Retrieve stored values or use defaults
-function getStoredItem(key, defaultVal) {
-  const stored = localStorage.getItem(key);
-  return stored ? stored : defaultVal;
-}
-let color1 = getStoredItem("color1", "#a938ff");
-let color2 = getStoredItem("color2", "#bd71ff");
-// Current shape: 'triangles' or 'quarters'
-let currentShape = getStoredItem("shape", "triangles");
+const tilingCanvas = document.getElementById("canvas");
+const tilingCanvasContext = canvas.getContext("2d");
 
-
-let tileSize = 20; // default tile size
-
-function resizeCanvas() {
+function resizeCanvas(ctx, canvas, shape, primaryColor, backgroundColor, tileSize) {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  drawTiling();
+  drawTiling(ctx, canvas, shape, primaryColor, backgroundColor, tileSize);
 }
 
 function circularShiftArray(inputArray, nShifts) {
@@ -25,7 +12,7 @@ function circularShiftArray(inputArray, nShifts) {
   return inputArray.slice(splitIdx).concat(inputArray.slice(0, splitIdx));
 }
 
-function drawTriangles(i, j) {
+function drawTriangles(i, j, ctx, color, tileSize) {
   const x = j * tileSize;
   const y = i * tileSize;
 
@@ -48,8 +35,8 @@ function drawTriangles(i, j) {
     Math.round(Math.random() * 3),
   );
 
-  // Draw first triangle with color1
-  ctx.fillStyle = color1;
+  // Draw first triangle with color
+  ctx.fillStyle = color;
   ctx.beginPath();
   ctx.moveTo(x + shiftedCornersMatrix[0][0], y + shiftedCornersMatrix[0][1]);
   ctx.lineTo(x + shiftedCornersMatrix[1][0], y + shiftedCornersMatrix[1][1]);
@@ -60,7 +47,7 @@ function drawTriangles(i, j) {
   // (The second triangle will be the negative space in the background)
 }
 
-function drawQuarterCircles(i, j) {
+function drawQuarterCircles(i, j, ctx, color, tileSize) {
   const x = j * tileSize;
   const y = i * tileSize;
 
@@ -90,7 +77,7 @@ function drawQuarterCircles(i, j) {
     orientation = topRightBottomLeft;
   }
   ctx.lineWidth = 5;
-  ctx.strokeStyle = color1;
+  ctx.strokeStyle = color;
   ctx.beginPath();
   ctx.arc(
     x + orientation.corners[0].x,
@@ -112,49 +99,18 @@ function drawQuarterCircles(i, j) {
   ctx.stroke();
 }
 
-function drawTiling() {
+function drawTiling(ctx, canvas, shape, primaryColor, backgroundColor, tileSize) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  canvas.style.background = color2;
+  canvas.style.background = backgroundColor;
   const rows = Math.ceil(canvas.height / tileSize);
   const cols = Math.ceil(canvas.width / tileSize);
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-      if (currentShape === "triangles") {
-        drawTriangles(i, j);
+      if (shape === "triangles") {
+        drawTriangles(i, j, tilingCanvasContext, primaryColor, tileSize);
       } else {
-        drawQuarterCircles(i, j);
+        drawQuarterCircles(i, j, tilingCanvasContext, primaryColor, tileSize);
       }
     }
   }
 }
-
-document.getElementById("color1").value = color1;
-document.getElementById("shape").value = currentShape;
-document.getElementById("color1").addEventListener("input", (e) => {
-  color1 = e.target.value;
-  localStorage.setItem("color1", color1);
-  drawTiling();
-});
-document.getElementById("color2").value = color2;
-document.getElementById("color2").addEventListener("input", (e) => {
-  color2 = e.target.value;
-  localStorage.setItem("color2", color2);
-  drawTiling();
-});
-document.getElementById("tileSize").addEventListener("input", (e) => {
-  const val = parseInt(e.target.value, 10);
-  if (val > 0) {
-    tileSize = val;
-    resizeCanvas();
-  }
-});
-
-// Shape selector
-document.getElementById("shape").addEventListener("change", (e) => {
-  currentShape = e.target.value;
-  localStorage.setItem("shape", currentShape);
-  drawTiling();
-});
-
-window.addEventListener("resize", resizeCanvas);
-window.addEventListener("load", resizeCanvas);

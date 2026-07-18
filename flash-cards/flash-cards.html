@@ -8,6 +8,8 @@
 </head>
 <body>
 <div id="stats">Correct: <span id="correctCount">0</span>, Incorrect: <span id="incorrectCount">0</span></div>
+<div id="bucketSelector" style="text-align:center; margin-top:10px;"> <!-- bucket buttons will be inserted here -->
+</div>
 
 <div id="card-container">
   <div id="flashcard" class="card" tabindex="0">
@@ -38,6 +40,10 @@
   </div>
   <!-- Settings Menu -->
   <div id="settingsMenu" style="margin-top:10px;">
+    <label style="display:block; margin-bottom:5px;">
+      Number of Buckets:
+      <input type="number" id="bucketCount" min="1" value="3" style="width:50px; margin-left:5px;" />
+    </label>
     <label style="display:block; margin-bottom:5px;">
       <input type="checkbox" id="darkModeToggle" /> Dark Mode
     </label>

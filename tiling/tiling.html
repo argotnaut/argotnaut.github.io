@@ -1,19 +1,117 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<title>Truchet Tiling</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="tiling.css">
-</head>
-<body>
-<canvas id="canvas"></canvas>
-<div id="controls">
-  <label>Color 1: <input type="color" id="color1"></label>
-  <label>Color 2: <input type="color" id="color2"></label>
-  <label>Tile size: <input type="number" id="tileSize" min="5" max="200" value="20"></label>
-  <label>Shape: <select id="shape"><option value="triangles">Triangles</option><option value="quarters" selected>Quarter Circles</option></select></label>
-</div>
-<script src="tiling.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <title>Truchet Tiling</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="tiling.css" />
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <div id="controls">
+      <label>Color 1: <input type="color" id="color1" /></label>
+      <label>Color 2: <input type="color" id="color2" /></label>
+      <label
+        >Tile size:
+        <input type="number" id="tileSize" min="5" max="200" value="20"
+      /></label>
+      <label
+        >Shape:
+        <select id="shape">
+          <option value="triangles">Triangles</option>
+          <option value="quarters" selected>Quarter Circles</option>
+        </select></label
+      >
+    </div>
+    <script src="tiling.js"></script>
+    <script>
+      // Retrieve stored values or use defaults
+      function getStoredItem(key, defaultVal) {
+        const stored = localStorage.getItem(key);
+        return stored ? stored : defaultVal;
+      }
+      let color1 = getStoredItem("color1", "#a938ff");
+      let color2 = getStoredItem("color2", "#bd71ff");
+      // Current shape: 'triangles' or 'quarters'
+      let currentShape = getStoredItem("shape", "triangles");
+      let tileSize = 20; // default tile size
+
+      document.getElementById("color1").value = color1;
+      document.getElementById("shape").value = shape;
+      document.getElementById("color1").addEventListener("input", (e) => {
+        color1 = e.target.value;
+        localStorage.setItem("color1", color1);
+        drawTiling(
+          tilingCanvasContext,
+          tilingCanvas,
+          currentShape,
+          color1,
+          color2,
+          tileSize
+        );
+      });
+      document.getElementById("color2").value = color2;
+      document.getElementById("color2").addEventListener("input", (e) => {
+        color2 = e.target.value;
+        localStorage.setItem("color2", color2);
+        drawTiling(
+          tilingCanvasContext,
+          tilingCanvas,
+          currentShape,
+          color1,
+          color2,
+          tileSize
+        );
+      });
+      document.getElementById("tileSize").addEventListener("input", (e) => {
+        const val = parseInt(e.target.value, 10);
+        if (val > 0) {
+          tileSize = val;
+          resizeCanvas(
+            tilingCanvasContext,
+            tilingCanvas,
+            currentShape,
+            color1,
+            color2,
+            tileSize
+          );
+        }
+      });
+
+      // Shape selector
+      document.getElementById("shape").addEventListener("change", (e) => {
+        currentShape = e.target.value;
+        localStorage.setItem("shape", currentShape);
+        drawTiling(
+          tilingCanvasContext,
+          tilingCanvas,
+          currentShape,
+          color1,
+          color2,
+          tileSize
+        );
+      });
+
+      window.addEventListener("resize", () =>
+        resizeCanvas(
+          tilingCanvasContext,
+          tilingCanvas,
+          currentShape,
+          color1,
+          color2,
+          tileSize
+        ),
+      );
+      window.addEventListener("load", () =>
+        resizeCanvas(
+          tilingCanvasContext,
+          tilingCanvas,
+          currentShape,
+          color1,
+          color2,
+          tileSize
+        ),
+      );
+    </script>
+  </body>
 </html>

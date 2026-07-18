@@ -33,11 +33,50 @@ const correctCountEl = document.getElementById("correctCount");
 const incorrectCountEl = document.getElementById("incorrectCount");
 
 let currentIndex = 0;
+let bucketCount = 3;
+let buckets = [];
+let currentBucketIndex = 0;
+
 let correctCount = 0;
 let incorrectCount = 0;
 let currentCard = null;
 
 let orderMode = 'order'; // default ordering
+
+// Spaced repetition helper functions
+function initializeBuckets() {
+  buckets = [];
+  for (let i=0; i<bucketCount; i++) {
+    buckets.push([]);
+  }
+  if (flashcards.length > 0) {
+    buckets[0] = [...flashcards];
+  }
+}
+
+function renderBucketButtons() {
+  const selector = document.getElementById('bucketSelector');
+  if (!selector) return;
+  selector.innerHTML = '';
+  for (let i=0; i<bucketCount; i++) {
+    const btn = document.createElement('button');
+    btn.textContent = i+1;
+    btn.dataset.bucketIndex = i;
+    if (i === currentBucketIndex) btn.classList.add('active');
+    btn.addEventListener('click', () => {
+      currentBucketIndex = i;
+      currentIndex = 0;
+      renderBucketButtons();
+      if (buckets[i] && buckets[i].length > 0) {
+        showCard(0);
+      } else {
+        showCard(0);
+      }
+    });
+    selector.appendChild(btn);
+  }
+}
+
 
 // Drawer elements and toggle logic
 const drawer = document.getElementById("drawer");
@@ -72,6 +111,7 @@ if (darkModeToggle) {
 
 // Order mode selection
 const orderSelect = document.getElementById('orderSelect');
+const bucketCountInput = document.getElementById('bucketCount');
 if (orderSelect) {
   const savedOrder = localStorage.getItem('orderMode') || 'order';
   orderSelect.value = savedOrder;
@@ -79,6 +119,25 @@ if (orderSelect) {
   orderSelect.addEventListener('change', () => {
     orderMode = orderSelect.value;
     localStorage.setItem('orderMode', orderMode);
+  });
+}
+
+// Bucket count handling
+if (bucketCountInput) {
+  const stored = parseInt(localStorage.getItem('bucketCount')) || 3;
+  bucketCount = stored;
+  bucketCountInput.value = bucketCount;
+  bucketCountInput.addEventListener('change', () => {
+    const val = parseInt(bucketCountInput.value);
+    if (!isNaN(val) && val > 0 && val !== bucketCount) {
+      bucketCount = val;
+      localStorage.setItem('bucketCount', bucketCount);
+      initializeBuckets();
+      renderBucketButtons();
+      currentBucketIndex = 0;
+      currentIndex = 0;
+      showCard(0);
+    }
   });
 }
 
@@ -111,6 +170,10 @@ if (submitBtn) {
       incorrectCount = 0;
       correctCountEl.textContent = "0";
       incorrectCountEl.textContent = "0";
+      initializeBuckets();
+      renderBucketButtons();
+      currentBucketIndex = 0;
+      currentIndex = 0;
       showCard(currentIndex);
     } catch (e) {
       alert("Invalid JSON: " + e.message);
@@ -127,18 +190,13 @@ if (answerSubmitBtn) {
       (a) => a.toLowerCase() === userAns.toLowerCase(),
     );
     if (isCorrect) {
-      correctCount++;
-      correctCountEl.textContent = correctCount;
-      answerIcon.textContent = "✓";
+      handleCorrect();
     } else {
-      incorrectCount++;
-      incorrectCountEl.textContent = incorrectCount;
-      answerIcon.textContent = "✗";
+      handleIncorrect();
     }
     // Hide input and show icon
     hideAnswerInput();
     answerIcon.style.display = "block";
-    flipCard()
   });
 }
 
@@ -186,9 +244,21 @@ function currentCardHasAnswers() {
 }
 
 async function showCard(index) {
+  const bucket = buckets[currentBucketIndex];
+  if (!bucket || bucket.length === 0) {
+    cardEl.classList.remove("flipped");
+    frontEl.textContent = "No cards in this bucket";
+    backEl.textContent = "";
+    hideAnswerInput();
+    hideAnswerButtons();
+    answerIcon.style.display = "none";
+    answerInput.value = "";
+    return;
+  }
+  currentIndex = index;
   cardEl.classList.remove("flipped");
-  await new Promise((r) => setTimeout(r, 250)); // 250 is half the duration of the linear 'flip' transition
-  const card = flashcards[index];
+  await new Promise((r) => setTimeout(r, 250));
+  const card = bucket[index];
   currentCard = card;
   frontEl.textContent = card.front;
   backEl.textContent = card.back;
@@ -203,16 +273,65 @@ async function showCard(index) {
 }
 
 function nextCard() {
-  if (orderMode === "order") {
-    currentIndex = (currentIndex + 1) % flashcards.length;
-  } else {
-    let newIndex = Math.floor(Math.random() * flashcards.length);
-    if (orderMode === "other" && newIndex === currentIndex) {
-      newIndex = (newIndex + 1) % flashcards.length;
+  const bucket = buckets[currentBucketIndex];
+  if (!bucket || bucket.length === 0) {
+    // Find next non‑empty bucket
+    for (let i=0; i<bucketCount; i++) {
+      const idx = (currentBucketIndex + 1 + i) % bucketCount;
+      if (buckets[idx] && buckets[idx].length > 0) {
+        currentBucketIndex = idx;
+        currentIndex = 0;
+        showCard(0);
+        return;
+      }
     }
-    currentIndex = newIndex;
+    // No cards in any bucket
+    return;
   }
+  currentIndex = (currentIndex + 1) % bucket.length;
   showCard(currentIndex);
+}
+
+function handleCorrect() {
+  correctCount++;
+  correctCountEl.textContent = correctCount;
+  const card = currentCard;
+  const bucket = buckets[currentBucketIndex];
+  bucket.splice(currentIndex, 1);
+  // move card to next bucket (or keep if last)
+  if (currentBucketIndex < bucketCount - 1) {
+    buckets[currentBucketIndex + 1].push(card);
+  } else {
+    bucket.push(card); // keep in last bucket
+  }
+  if (bucket.length === 0) {
+    // bucket is now empty – show placeholder
+    showCard(0);
+  } else {
+    if (currentIndex >= bucket.length) currentIndex = 0;
+    nextCard();
+  }
+}
+
+function handleIncorrect() {
+  incorrectCount++;
+  incorrectCountEl.textContent = incorrectCount;
+  const card = currentCard;
+  const bucket = buckets[currentBucketIndex];
+  bucket.splice(currentIndex, 1);
+  // move card to previous bucket (or keep if first)
+  if (currentBucketIndex > 0) {
+    buckets[currentBucketIndex - 1].push(card);
+  } else {
+    bucket.push(card); // keep in first bucket
+  }
+  if (bucket.length === 0) {
+    // bucket is now empty – show placeholder
+    showCard(0);
+  } else {
+    if (currentIndex >= bucket.length) currentIndex = 0;
+    nextCard();
+  }
 }
 
 function showInput() {
@@ -248,13 +367,9 @@ document.addEventListener("keydown", (e) => {
   if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA"))
     return;
   if (e.key === "c") {
-    correctCount++;
-    correctCountEl.textContent = correctCount;
-    nextCard();
+    if (currentCard) handleCorrect();
   } else if (e.key === "i") {
-    incorrectCount++;
-    incorrectCountEl.textContent = incorrectCount;
-    nextCard();
+    if (currentCard) handleIncorrect();
   }
 });
 
@@ -281,22 +396,17 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-correctBtn.addEventListener("click", () => {
-  correctCount++;
-  correctCountEl.textContent = correctCount;
-  nextCard();
-});
+correctBtn.addEventListener("click", handleCorrect);
 
-incorrectBtn.addEventListener("click", () => {
-  incorrectCount++;
-  incorrectCountEl.textContent = incorrectCount;
-  nextCard();
-});
+incorrectBtn.addEventListener("click", handleIncorrect);
 
 // Init
-showCard(currentIndex);
 
 // Initialize JSON textarea with default cards
 if (jsonInput) {
   jsonInput.value = JSON.stringify(defaultFlashcards, null, 2);
 }
+
+initializeBuckets();
+renderBucketButtons();
+showCard(currentIndex);
