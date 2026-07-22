@@ -9,10 +9,16 @@
 <body>
 <h1>Color Picker</h1>
 <input type="color" id="colorInput" value="#ff0000">
-<div id="preview"></div>
+<div style="align-items: center; display: flex; flex-direction: row;">
+  <div id="preview"></div>
+  <div id="color-wheel"></div>
+</div>
 <div id="colorPickerWrapper">
   <div id="schemeGroups"></div>
 </div>
+<script src="vector.js"></script>
+<script src="matrix-2d.js"></script>
+<script src="matrix-3d.js"></script>
 <script src="color-picker.js"></script>
 </body>
 </html>

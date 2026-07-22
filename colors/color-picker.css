@@ -66,3 +66,8 @@ body {
 #schemeGroups {
   width: 600px;
 }
+
+#color-wheel {
+  width: 200px;
+  height: 200px;
+}

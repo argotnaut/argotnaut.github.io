@@ -1,42 +1,9 @@
-// Circular Linked List implementation
-class LinkedListNode {
-  constructor(value) {
-    this.value = value;
-    this.next = null;
-  }
-}
-
-class LinkedList {
-  constructor() {
-    this.head = null;
-    this.tail = null;
-    this.length = 0;
-  }
-
-  // Append a new node with the given value to the list
-  append(value) {
-    const node = new LinkedListNode(value);
-    if (!this.head) {
-      // First node; points to itself to form a circle
-      this.head = this.tail = node;
-      node.next = node;
-    } else {
-      // Insert node after tail and update tail
-      this.tail.next = node;
-      this.tail = node;
-      node.next = this.head;
-    }
-    this.length++;
-    return node;
-  }
-}
-
 const targetCanvas = document.getElementById("canvas");
 const targetCanvasContext = targetCanvas.getContext("2d");
 const pointsInput = document.getElementById("points");
 const hopsInput = document.getElementById("hops");
 
-async function drawPoints(n, hops, canvas, ctx) {
+async function drawPolygon(n, hops, canvas, ctx) {
   const cx = canvas.width / 2;
   const cy = canvas.height / 2;
   const r = Math.min(canvas.width, canvas.height) / 3;
@@ -64,6 +31,8 @@ async function drawPoints(n, hops, canvas, ctx) {
   */
   let starting_points = [points.head];
   let num_points = 0;
+
+  let lines = [];
   do {
     /*
     Get the next point to lineTo by "hopping" a certain number
@@ -81,6 +50,7 @@ async function drawPoints(n, hops, canvas, ctx) {
     ctx.lineTo(next_point.value.cx, next_point.value.cy);
     ctx.strokeStyle = "#0084ff";
     ctx.stroke();
+    lines.push([current_point, next_point])
     current_point = next_point
     num_points++
     /*
@@ -93,13 +63,14 @@ async function drawPoints(n, hops, canvas, ctx) {
       starting_points.push(current_point)
     }
   } while (num_points < points.length);
+  return lines // Return the lines that constitute the polygon
 }
 
 function resizeCanvas() {
   targetCanvas.style.background = "#0f1b4d";
   targetCanvas.width = window.innerWidth;
   targetCanvas.height = window.innerHeight;
-  drawPoints(
+  lines = drawPolygon(
     pointsInput.valueAsNumber,
     hopsInput.valueAsNumber,
     targetCanvas,
