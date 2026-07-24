@@ -51,12 +51,47 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.lineWidth = 1;
     ctx.fill();
     ctx.stroke();
+    // Draw dependent cursors for selected color scheme
+    if (selectedSchemeColors && selectedSchemeColors.length > 1) {
+      selectedSchemeColors.forEach((color) => {
+        if (color.toUpperCase() === baseColor) return;
+        const rgbC = hexToRgb(color);
+        const hslC = rgbToHsl(rgbC.r, rgbC.g, rgbC.b);
+        const angleC = (hslC.h * Math.PI) / 180;
+        const xC = cx + ringRadius * Math.cos(angleC);
+        const yC = cy + ringRadius * Math.sin(angleC);
+        // line
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(xC, yC);
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(xC, yC, cursorRadius, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 1;
+        ctx.fill();
+        ctx.stroke();
+      });
+    }
   }
+  window.drawWheelAndCursor = drawWheelAndCursor;
 
   function updateCursorFromBaseColor() {
     const rgb = hexToRgb(baseColor);
     const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
     cursorAngle = (hsl.h * Math.PI) / 180;
+    if (selectedSchemeName) {
+      const schemeCfg = schemeConfigs.find(
+        (c) => c.name === selectedSchemeName,
+      );
+      selectedSchemeColors = schemeCfg.func(baseColor);
+    } else {
+      selectedSchemeColors = null;
+    }
     drawWheelAndCursor();
   }
 
@@ -76,23 +111,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const newBaseColorAsHSL = {
       h: hue,
       s: oldBaseColorAsHSL.s,
-      l: oldBaseColorAsHSL.l
+      l: oldBaseColorAsHSL.l,
     };
     const newBaseColorAsRGB = hslToRgb(
       newBaseColorAsHSL.h,
       newBaseColorAsHSL.s,
-      newBaseColorAsHSL.l
+      newBaseColorAsHSL.l,
     );
     baseColor = rgbToHex(
       newBaseColorAsRGB.r,
       newBaseColorAsRGB.g,
-      newBaseColorAsRGB.b
+      newBaseColorAsRGB.b,
     );
     preview.style.backgroundColor = baseColor;
     preview.textContent = baseColor;
     input.value = baseColor;
     recalculateColors();
-    drawWheelAndCursor();
+    updateCursorFromBaseColor();
   }
 
   wheelCanvas.addEventListener("mousedown", (e) => {
@@ -224,16 +259,16 @@ function hslToRgb(h, s, l) {
     };
     const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
     const p = 2 * l - q;
-    r = hue2rgb(p, q, h + 1 / 3)*255;
-    g = hue2rgb(p, q, h)*255;
-    b = hue2rgb(p, q, h - 1 / 3)*255;
+    r = hue2rgb(p, q, h + 1 / 3) * 255;
+    g = hue2rgb(p, q, h) * 255;
+    b = hue2rgb(p, q, h - 1 / 3) * 255;
   }
   return { r, g, b };
 }
 
 function hslToHex(h, s, l) {
   const { r, g, b } = hslToRgb(h, s, l);
-  return rgbToHex(r, g, b)
+  return rgbToHex(r, g, b);
 }
 
 function rgbToHex(r, g, b) {
@@ -241,7 +276,12 @@ function rgbToHex(r, g, b) {
     const hex = Math.round(c).toString(16);
     return hex.length === 1 ? "0" + hex : hex;
   };
-  return "#" + toHex(r).toUpperCase() + toHex(g).toUpperCase() + toHex(b).toUpperCase();
+  return (
+    "#" +
+    toHex(r).toUpperCase() +
+    toHex(g).toUpperCase() +
+    toHex(b).toUpperCase()
+  );
 }
 
 function drawColorWheel(canvas) {
@@ -360,6 +400,9 @@ const schemeConfigs = [
 let schemeGroupsContainer = null;
 const schemeSquaresMap = {};
 let baseColor = "#ff0000";
+let selectedSchemeDiv = null;
+let selectedSchemeName = null;
+let selectedSchemeColors = null;
 
 function recalculateColors() {
   if (!schemeGroupsContainer) {
@@ -382,6 +425,24 @@ function recalculateColors() {
         squares.push(div);
       }
       groupDiv.appendChild(squaresDiv);
+      groupDiv.addEventListener("click", () => {
+        if (selectedSchemeDiv === groupDiv) {
+          groupDiv.classList.remove("selected");
+          selectedSchemeDiv = null;
+          selectedSchemeName = null;
+          selectedSchemeColors = null;
+        } else {
+          if (selectedSchemeDiv) {
+            selectedSchemeDiv.classList.remove("selected");
+          }
+          groupDiv.classList.add("selected");
+          selectedSchemeDiv = groupDiv;
+          selectedSchemeName = cfg.name;
+          selectedSchemeColors = cfg.func(baseColor);
+        }
+        // Redraw wheel with dependent cursors
+        window.drawWheelAndCursor();
+      });
       schemeGroupsContainer.appendChild(groupDiv);
       schemeSquaresMap[cfg.name] = squares;
     });
