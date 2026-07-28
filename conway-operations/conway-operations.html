@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Conway polyhedra notation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="conway-operations.css" />
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <div id="controls">
+        <select id="shape">
+          <option value="tetragon">Tetragon</option>
+          <option value="cube">Cube</option>
+          <option value="octahedron">Octahedron</option>
+          <option value="icosahedron">Icosahedron</option>
+        </select>
+        <div id="polygon-controls">
+          <label>Focal Distance: <input type="number" id="focalDistance" step="1" min="1" max="50" value="20"></label>
+          <label>Principal X: <input type="number" id="principalX" step="0.1" value="0"></label>
+          <label>Principal Y: <input type="number" id="principalY" step="0.1" value="0"></label>
+          <label>Skew Coefficient: <input type="number" id="skewCoefficient" step="0.1" value="1"></label>
+          <label>Translation X: <input type="number" id="translationX" step="1" value="0"></label>
+          <label>Translation Y: <input type="number" id="translationY" step="1" value="0"></label>
+          <label>Translation Z: <input type="number" id="translationZ" step="1" value="200"></label>
+        </div>
+    </div>
+    <script src="../colors/vector.js"></script>
+    <script src="../colors/matrix.js"></script>
+    <script src="conway-operations.js"></script>
+    <script>
+  function initControls() {
+    const shapeSelect = document.getElementById('shape');
+    const controls = {
+      focalDistance: document.getElementById('focalDistance'),
+      principalX: document.getElementById('principalX'),
+      principalY: document.getElementById('principalY'),
+      skewCoefficient: document.getElementById('skewCoefficient'),
+      translationX: document.getElementById('translationX'),
+      translationY: document.getElementById('translationY'),
+      translationZ: document.getElementById('translationZ')
+    };
+    const update = () => {
+      focalDistance = parseFloat(controls.focalDistance.value);
+      principalX = parseFloat(controls.principalX.value);
+      principalY = parseFloat(controls.principalY.value);
+      skewCoefficient = parseFloat(controls.skewCoefficient.value);
+      translationX = parseFloat(controls.translationX.value);
+      translationY = parseFloat(controls.translationY.value);
+      translationZ = parseFloat(controls.translationZ.value);
+      showPolygon();
+    };
+    const updateShape = () => {
+      const val = shapeSelect.value;
+      selectedShape = val.charAt(0).toUpperCase() + val.slice(1);
+      showPolygon();
+    };
+    for (const key in controls) {
+      controls[key].addEventListener('input', update);
+    }
+    shapeSelect.addEventListener('change', updateShape);
+    // initialize
+    selectedShape = shapeSelect.value.charAt(0).toUpperCase() + shapeSelect.value.slice(1);
+    update();
+  }
+  window.addEventListener("resize", resizeCanvas);
+  window.addEventListener("load", () => {
+    resizeCanvas();
+    initControls();
+  });
+</script>
+  </body>
+</html>

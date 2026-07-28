@@ -157,17 +157,17 @@ document.addEventListener("DOMContentLoaded", () => {
  * space where the z-axis is the longest diagonal across the color
  * cube (i.e. the space where <r=1, g=1, b=1> in the color space
  * corresponds to <0, 0, 1>)
- * @returns {Matrix3D}
+ * @returns {NDMatrix}
  */
 function getColorSpaceRotationBasisSet() {
-  let output = Matrix3D.identity();
-  return output.multiply(Matrix3D.rotationMatrix(Math.PI / 4, 0, Math.PI / 4));
+  let output = NDMatrix.identity(3);
+  return output.multiply(NDMatrix.rotationMatrix(Math.PI / 4, 0, Math.PI / 4));
 }
 
 /**
  * Returns a transform matrix for rotating a vector by a given
  * angle in radians around the longest diagonal of the color cube
- * @returns {Matrix3D}
+ * @returns {NDMatrix}
  */
 function rotateVectorAroundDiagonal(theta) {
   const colorSpaceRotationSet = getColorSpaceRotationBasisSet();
@@ -179,7 +179,7 @@ function rotateVectorAroundDiagonal(theta) {
     cube's diagonal is the z basis vector, hence rotating the vector around
     the z-axis by theta radians here
     */
-      Matrix3D.rotationMatrix(0, 0, theta),
+      NDMatrix.rotationMatrix(0, 0, theta),
     )
     .multiply(colorSpaceRotationSet);
 }
