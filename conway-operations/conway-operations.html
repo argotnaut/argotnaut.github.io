@@ -9,22 +9,33 @@
   <body>
     <canvas id="canvas"></canvas>
     <div id="controls">
-        <select id="shape">
-          <option value="tetragon">Tetragon</option>
-          <option value="cube">Cube</option>
-          <option value="octahedron">Octahedron</option>
-          <option value="icosahedron">Icosahedron</option>
-        </select>
-        <div id="polygon-controls">
-          <label>Focal Distance: <input type="number" id="focalDistance" step="1" min="1" max="50" value="20"></label>
-          <label>Principal X: <input type="number" id="principalX" step="0.1" value="0"></label>
-          <label>Principal Y: <input type="number" id="principalY" step="0.1" value="0"></label>
-          <label>Skew Coefficient: <input type="number" id="skewCoefficient" step="0.1" value="1"></label>
-          <label>Translation X: <input type="number" id="translationX" step="1" value="0"></label>
-          <label>Translation Y: <input type="number" id="translationY" step="1" value="0"></label>
-          <label>Translation Z: <input type="number" id="translationZ" step="1" value="200"></label>
-        </div>
+  <details id="camera-controls">
+    <summary>Camera Controls</summary>
+    <div id="polygon-controls">
+      <label>Focal Distance: <input type="number" id="focalDistance" step="1" min="1" max="100" value="50"></label>
+      <label>Principal X: <input type="number" id="principalX" step="0.1" value="0"></label>
+      <label>Principal Y: <input type="number" id="principalY" step="0.1" value="0"></label>
+      <label>Skew Coefficient: <input type="number" id="skewCoefficient" step="0.1" value="1"></label>
+      <label>Translation X: <input type="number" id="translationX" step="1" value="0"></label>
+      <label>Translation Y: <input type="number" id="translationY" step="1" value="0"></label>
+      <label>Translation Z: <input type="number" id="translationZ" step="1" value="700"></label>
     </div>
+  </details>
+  <details id="shape-controls">
+    <summary>Shape Controls</summary>
+    <select id="shape">
+      <option value="cube">Cube</option>
+      <option value="octahedron">Octahedron</option>
+      <option value="icosahedron">Icosahedron</option>
+      <option value="tetragon">Tetragon</option>
+    </select>
+    <div id="rotation-controls">
+      <label>Rotation X: <input type="number" id="rotationX" step="0.1" value="0"></label>
+      <label>Rotation Y: <input type="number" id="rotationY" step="0.1" value="0"></label>
+      <label>Rotation Z: <input type="number" id="rotationZ" step="0.1" value="0"></label>
+    </div>
+  </details>
+</div>
     <script src="../colors/vector.js"></script>
     <script src="../colors/matrix.js"></script>
     <script src="conway-operations.js"></script>
@@ -38,7 +49,10 @@
       skewCoefficient: document.getElementById('skewCoefficient'),
       translationX: document.getElementById('translationX'),
       translationY: document.getElementById('translationY'),
-      translationZ: document.getElementById('translationZ')
+      translationZ: document.getElementById('translationZ'),
+      rotationX: document.getElementById('rotationX'),
+      rotationY: document.getElementById('rotationY'),
+      rotationZ: document.getElementById('rotationZ')
     };
     const update = () => {
       focalDistance = parseFloat(controls.focalDistance.value);
@@ -48,6 +62,9 @@
       translationX = parseFloat(controls.translationX.value);
       translationY = parseFloat(controls.translationY.value);
       translationZ = parseFloat(controls.translationZ.value);
+      rotationX = parseFloat(controls.rotationX.value);
+      rotationY = parseFloat(controls.rotationY.value);
+      rotationZ = parseFloat(controls.rotationZ.value);
       showPolygon();
     };
     const updateShape = () => {

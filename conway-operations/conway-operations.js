@@ -9,17 +9,36 @@ let skewCoefficient = 1;
 let translationX = 50;
 let translationY = 0;
 let translationZ = 0;
-let selectedShape = 'Cube';
+let selectedShape = "Cube";
 let shapeSizeCoefficient = 10;
+let rotationX = 0;
+let rotationY = 0;
+let rotationZ = 0;
 
 const g = 1.618033988749895;
 const Seeds = {
   Tetragon: {
     vertices: [
-      new Vector(shapeSizeCoefficient, shapeSizeCoefficient, shapeSizeCoefficient),
-      new Vector(-shapeSizeCoefficient, -shapeSizeCoefficient, shapeSizeCoefficient),
-      new Vector(-shapeSizeCoefficient, shapeSizeCoefficient, -shapeSizeCoefficient),
-      new Vector(shapeSizeCoefficient, -shapeSizeCoefficient, -shapeSizeCoefficient),
+      new Vector(
+        shapeSizeCoefficient,
+        shapeSizeCoefficient,
+        shapeSizeCoefficient,
+      ),
+      new Vector(
+        -shapeSizeCoefficient,
+        -shapeSizeCoefficient,
+        shapeSizeCoefficient,
+      ),
+      new Vector(
+        -shapeSizeCoefficient,
+        shapeSizeCoefficient,
+        -shapeSizeCoefficient,
+      ),
+      new Vector(
+        shapeSizeCoefficient,
+        -shapeSizeCoefficient,
+        -shapeSizeCoefficient,
+      ),
     ],
     faces: [
       [0, 2, 1],
@@ -30,14 +49,46 @@ const Seeds = {
   },
   Cube: {
     vertices: [
-      new Vector(shapeSizeCoefficient, shapeSizeCoefficient, shapeSizeCoefficient),
-      new Vector(shapeSizeCoefficient, shapeSizeCoefficient, -shapeSizeCoefficient),
-      new Vector(shapeSizeCoefficient, -shapeSizeCoefficient, shapeSizeCoefficient),
-      new Vector(shapeSizeCoefficient, -shapeSizeCoefficient, -shapeSizeCoefficient),
-      new Vector(-shapeSizeCoefficient, shapeSizeCoefficient, shapeSizeCoefficient),
-      new Vector(-shapeSizeCoefficient, shapeSizeCoefficient, -shapeSizeCoefficient),
-      new Vector(-shapeSizeCoefficient, -shapeSizeCoefficient, shapeSizeCoefficient),
-      new Vector(-shapeSizeCoefficient, -shapeSizeCoefficient, -shapeSizeCoefficient),
+      new Vector(
+        shapeSizeCoefficient,
+        shapeSizeCoefficient,
+        shapeSizeCoefficient,
+      ),
+      new Vector(
+        shapeSizeCoefficient,
+        shapeSizeCoefficient,
+        -shapeSizeCoefficient,
+      ),
+      new Vector(
+        shapeSizeCoefficient,
+        -shapeSizeCoefficient,
+        shapeSizeCoefficient,
+      ),
+      new Vector(
+        shapeSizeCoefficient,
+        -shapeSizeCoefficient,
+        -shapeSizeCoefficient,
+      ),
+      new Vector(
+        -shapeSizeCoefficient,
+        shapeSizeCoefficient,
+        shapeSizeCoefficient,
+      ),
+      new Vector(
+        -shapeSizeCoefficient,
+        shapeSizeCoefficient,
+        -shapeSizeCoefficient,
+      ),
+      new Vector(
+        -shapeSizeCoefficient,
+        -shapeSizeCoefficient,
+        shapeSizeCoefficient,
+      ),
+      new Vector(
+        -shapeSizeCoefficient,
+        -shapeSizeCoefficient,
+        -shapeSizeCoefficient,
+      ),
     ],
     faces: [
       [0, 4, 6, 2],
@@ -70,18 +121,18 @@ const Seeds = {
   },
   Icosahedron: {
     vertices: [
-      new Vector(0, shapeSizeCoefficient, g*shapeSizeCoefficient),
-      new Vector(0, -shapeSizeCoefficient, g*shapeSizeCoefficient),
-      new Vector(0, shapeSizeCoefficient, -g*shapeSizeCoefficient),
-      new Vector(0, -shapeSizeCoefficient, -g*shapeSizeCoefficient),
-      new Vector(shapeSizeCoefficient, g*shapeSizeCoefficient, 0),
-      new Vector(-shapeSizeCoefficient, g*shapeSizeCoefficient, 0),
-      new Vector(shapeSizeCoefficient, -g*shapeSizeCoefficient, 0),
-      new Vector(-shapeSizeCoefficient, -g*shapeSizeCoefficient, 0),
-      new Vector(g*shapeSizeCoefficient, 0, shapeSizeCoefficient),
-      new Vector(-g*shapeSizeCoefficient, 0, shapeSizeCoefficient),
-      new Vector(g*shapeSizeCoefficient, 0, -shapeSizeCoefficient),
-      new Vector(-g*shapeSizeCoefficient, 0, -shapeSizeCoefficient),
+      new Vector(0, shapeSizeCoefficient, g * shapeSizeCoefficient),
+      new Vector(0, -shapeSizeCoefficient, g * shapeSizeCoefficient),
+      new Vector(0, shapeSizeCoefficient, -g * shapeSizeCoefficient),
+      new Vector(0, -shapeSizeCoefficient, -g * shapeSizeCoefficient),
+      new Vector(shapeSizeCoefficient, g * shapeSizeCoefficient, 0),
+      new Vector(-shapeSizeCoefficient, g * shapeSizeCoefficient, 0),
+      new Vector(shapeSizeCoefficient, -g * shapeSizeCoefficient, 0),
+      new Vector(-shapeSizeCoefficient, -g * shapeSizeCoefficient, 0),
+      new Vector(g * shapeSizeCoefficient, 0, shapeSizeCoefficient),
+      new Vector(-g * shapeSizeCoefficient, 0, shapeSizeCoefficient),
+      new Vector(g * shapeSizeCoefficient, 0, -shapeSizeCoefficient),
+      new Vector(-g * shapeSizeCoefficient, 0, -shapeSizeCoefficient),
     ],
     faces: [
       [0, 1, 8],
@@ -194,11 +245,11 @@ function drawPointOnCanvas(ctx, x, y) {
   const radius = 5;
   ctx.beginPath();
   ctx.arc(
-    x + (targetCanvas.width / 2),
-    y + (targetCanvas.height / 2),
+    x + targetCanvas.width / 2,
+    y + targetCanvas.height / 2,
     radius,
     0,
-    Math.PI * 2
+    Math.PI * 2,
   );
   ctx.fillStyle = "#000";
   ctx.fill();
@@ -208,9 +259,22 @@ function showPolygon() {
   const outputVertices = [];
   const shape = Seeds[selectedShape];
   if (!shape) return;
+  const shapeRotation = NDMatrix.rotationMatrix(
+    rotationX,
+    rotationY,
+    rotationZ
+  );
   shape.vertices.forEach((vertex) => {
+    let rotatedVertex = shapeRotation.multiply(
+      new NDMatrix([[vertex.x], [vertex.y], [vertex.z]]),
+    );
+    let rotatedVertexVector = new Vector(
+      rotatedVertex.m[0][0],
+      rotatedVertex.m[1][0],
+      rotatedVertex.m[2][0],
+    );
     const point = projectOntoCameraPlane(
-      vertex,
+      rotatedVertexVector,
       focalDistance,
       1,
       1,
@@ -237,38 +301,70 @@ function resizeCanvas() {
   showPolygon();
 }
 
-// Drag handling for translation
+// Drag handling
 let isDragging = false;
 let dragStartX = 0;
 let dragStartY = 0;
 let startTranslationX = 0;
 let startTranslationY = 0;
 let startTranslationZ = 0;
+let startRotationX = 0;
+let startRotationY = 0;
+let startRotationZ = 0;
+let dragMode = "camera"; // or "shape"
 
 function onMouseDown(e) {
   e.preventDefault();
   isDragging = true;
   dragStartX = e.clientX;
   dragStartY = e.clientY;
-  startTranslationX = translationX;
-  startTranslationY = translationY;
-  startTranslationZ = translationZ;
+  const cameraOpen = document.getElementById("camera-controls").open;
+  const shapeOpen = document.getElementById("shape-controls").open;
+  if (shapeOpen) {
+    dragMode = "shape";
+    startRotationX = rotationX;
+    startRotationY = rotationY;
+    startRotationZ = rotationZ;
+  } else if (cameraOpen) {
+    dragMode = "camera";
+    startTranslationX = translationX;
+    startTranslationY = translationY;
+    startTranslationZ = translationZ;
+  } else {
+    // Default to camera if none open
+    dragMode = "camera";
+    startTranslationX = translationX;
+    startTranslationY = translationY;
+    startTranslationZ = translationZ;
+  }
 }
 
 function onMouseMove(e) {
   if (!isDragging) return;
   const dx = e.clientX - dragStartX;
   const dy = e.clientY - dragStartY;
-  const scale = 0.5; // adjust sensitivity
-  translationX = startTranslationX + dx * scale;
-  translationY = startTranslationY + dy * scale;
-  if (e.shiftKey) {
-    translationZ = startTranslationZ + dy * scale;
+  const scale = 0.005; // adjust sensitivity
+  if (dragMode === "camera") {
+    translationX = startTranslationX + dx * scale;
+    translationY = startTranslationY + dy * scale;
+    if (e.shiftKey) {
+      translationZ = startTranslationZ + dy * scale;
+    }
+    // Update input controls
+    document.getElementById("translationX").value = translationX;
+    document.getElementById("translationY").value = translationY;
+    document.getElementById("translationZ").value = translationZ;
+  } else if (dragMode === "shape") {
+    rotationX = startRotationX + dy * scale;
+    rotationY = startRotationY + dx * scale;
+    if (e.shiftKey) {
+      rotationZ = startRotationZ + dy * scale;
+    }
+    // Update input controls
+    document.getElementById("rotationX").value = rotationX;
+    document.getElementById("rotationY").value = rotationY;
+    document.getElementById("rotationZ").value = rotationZ;
   }
-  // Update input controls
-  document.getElementById('translationX').value = translationX;
-  document.getElementById('translationY').value = translationY;
-  document.getElementById('translationZ').value = translationZ;
   showPolygon();
 }
 
@@ -280,7 +376,19 @@ function onMouseLeave() {
   isDragging = false;
 }
 
-targetCanvas.addEventListener('mousedown', onMouseDown);
-targetCanvas.addEventListener('mousemove', onMouseMove);
-targetCanvas.addEventListener('mouseup', onMouseUp);
-targetCanvas.addEventListener('mouseleave', onMouseLeave);
+targetCanvas.addEventListener("mousedown", onMouseDown);
+targetCanvas.addEventListener("mousemove", onMouseMove);
+targetCanvas.addEventListener("mouseup", onMouseUp);
+targetCanvas.addEventListener("mouseleave", onMouseLeave);
+
+// Wheel handler for focal distance
+function onWheel(e) {
+  e.preventDefault();
+  const delta = e.deltaY;
+  focalDistance += delta * 0.01; // sensitivity
+  if (focalDistance < 0.1) focalDistance = 0.1;
+  document.getElementById("focalDistance").value = focalDistance;
+  showPolygon();
+}
+
+targetCanvas.addEventListener("wheel", onWheel);
