@@ -236,3 +236,51 @@ function resizeCanvas() {
 
   showPolygon();
 }
+
+// Drag handling for translation
+let isDragging = false;
+let dragStartX = 0;
+let dragStartY = 0;
+let startTranslationX = 0;
+let startTranslationY = 0;
+let startTranslationZ = 0;
+
+function onMouseDown(e) {
+  e.preventDefault();
+  isDragging = true;
+  dragStartX = e.clientX;
+  dragStartY = e.clientY;
+  startTranslationX = translationX;
+  startTranslationY = translationY;
+  startTranslationZ = translationZ;
+}
+
+function onMouseMove(e) {
+  if (!isDragging) return;
+  const dx = e.clientX - dragStartX;
+  const dy = e.clientY - dragStartY;
+  const scale = 0.5; // adjust sensitivity
+  translationX = startTranslationX + dx * scale;
+  translationY = startTranslationY + dy * scale;
+  if (e.shiftKey) {
+    translationZ = startTranslationZ + dy * scale;
+  }
+  // Update input controls
+  document.getElementById('translationX').value = translationX;
+  document.getElementById('translationY').value = translationY;
+  document.getElementById('translationZ').value = translationZ;
+  showPolygon();
+}
+
+function onMouseUp() {
+  isDragging = false;
+}
+
+function onMouseLeave() {
+  isDragging = false;
+}
+
+targetCanvas.addEventListener('mousedown', onMouseDown);
+targetCanvas.addEventListener('mousemove', onMouseMove);
+targetCanvas.addEventListener('mouseup', onMouseUp);
+targetCanvas.addEventListener('mouseleave', onMouseLeave);
