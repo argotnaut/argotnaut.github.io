@@ -21,7 +21,7 @@
       <label>Translation Z: <input type="number" id="translationZ" step="1" value="700"></label>
     </div>
   </details>
-  <details id="shape-controls">
+  <details id="shape-controls" open>
     <summary>Shape Controls</summary>
     <select id="shape">
       <option value="cube">Cube</option>
@@ -38,6 +38,9 @@
 </div>
     <script src="../colors/vector.js"></script>
     <script src="../colors/matrix.js"></script>
+    <script src="../colors/shape.js"></script>
+    <script src="../colors/camera.js"></script>
+    <script src="../colors/scene.js"></script>
     <script src="conway-operations.js"></script>
     <script>
   function initControls() {
@@ -55,22 +58,22 @@
       rotationZ: document.getElementById('rotationZ')
     };
     const update = () => {
-      focalDistance = parseFloat(controls.focalDistance.value);
-      principalX = parseFloat(controls.principalX.value);
-      principalY = parseFloat(controls.principalY.value);
-      skewCoefficient = parseFloat(controls.skewCoefficient.value);
-      translationX = parseFloat(controls.translationX.value);
-      translationY = parseFloat(controls.translationY.value);
-      translationZ = parseFloat(controls.translationZ.value);
+      camera.focalLength = parseFloat(controls.focalDistance.value);
+      camera.principalX = parseFloat(controls.principalX.value);
+      camera.principalY = parseFloat(controls.principalY.value);
+      camera.skew = parseFloat(controls.skewCoefficient.value);
+      camera.translationVector.x = parseFloat(controls.translationX.value);
+      camera.translationVector.y = parseFloat(controls.translationY.value);
+      camera.translationVector.z = parseFloat(controls.translationZ.value);
       rotationX = parseFloat(controls.rotationX.value);
       rotationY = parseFloat(controls.rotationY.value);
       rotationZ = parseFloat(controls.rotationZ.value);
-      showPolyhedron();
+      renderScene();
     };
     const updateShape = () => {
       const val = shapeSelect.value;
       selectedShape = val.charAt(0).toUpperCase() + val.slice(1);
-      showPolyhedron();
+      renderScene();
     };
     for (const key in controls) {
       controls[key].addEventListener('input', update);
@@ -80,9 +83,9 @@
     selectedShape = shapeSelect.value.charAt(0).toUpperCase() + shapeSelect.value.slice(1);
     update();
   }
-  window.addEventListener("resize", resizeCanvas);
+  window.addEventListener("resize", renderScene);
   window.addEventListener("load", () => {
-    resizeCanvas();
+    renderScene();
     initControls();
   });
 </script>
