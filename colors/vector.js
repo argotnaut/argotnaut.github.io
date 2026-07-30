@@ -15,6 +15,15 @@ class Vector {
   }
 
   /**
+   * Subtracts a vector from this one and returns a new Vector.
+   * @param {Vector} other
+   * @returns {Vector}
+   */
+  subtract(other) {
+    return new Vector(this.x - other.x, this.y - other.y, this.z - other.z);
+  }
+
+  /**
    * Multiplies this vector by a constant and returns a new Vector.
    * @param {Vector} other
    * @returns {Vector}
@@ -57,7 +66,7 @@ class Vector {
    * @returns {Vector}
    */
   normalized() {
-    return this.multiplyConstant(1/this.magnitude())
+    return this.multiplyConstant(1 / this.magnitude());
   }
 
   /**
@@ -69,23 +78,28 @@ class Vector {
    * @returns {Vector}
    */
   rotateAroundVector(theta, axis) {
-    axis = axis.normalized()
-    return this.multiplyConstant(Math.cos(theta)).add(
-      axis.cross(this).multiplyConstant(Math.sin(theta))
-    ).add(
-      axis.multiplyConstant(axis.dot(this)).multiplyConstant(1 - Math.cos(theta))
-    )
+    axis = axis.normalized();
+    return this.multiplyConstant(Math.cos(theta))
+      .add(axis.cross(this).multiplyConstant(Math.sin(theta)))
+      .add(
+        axis
+          .multiplyConstant(axis.dot(this))
+          .multiplyConstant(1 - Math.cos(theta)),
+      );
   }
-  
+
   /**
    * Transforms the vector by a 3x3 matrix.
    * @param {number[][]} matrix - 3x3 array of numbers.
    * @returns {Vector}
    */
   transform(matrix) {
-    const x = matrix[0][0] * this.x + matrix[0][1] * this.y + matrix[0][2] * this.z;
-    const y = matrix[1][0] * this.x + matrix[1][1] * this.y + matrix[1][2] * this.z;
-    const z = matrix[2][0] * this.x + matrix[2][1] * this.y + matrix[2][2] * this.z;
+    const x =
+      matrix[0][0] * this.x + matrix[0][1] * this.y + matrix[0][2] * this.z;
+    const y =
+      matrix[1][0] * this.x + matrix[1][1] * this.y + matrix[1][2] * this.z;
+    const z =
+      matrix[2][0] * this.x + matrix[2][1] * this.y + matrix[2][2] * this.z;
     return new Vector(x, y, z);
   }
 }

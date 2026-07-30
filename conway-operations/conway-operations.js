@@ -10,7 +10,7 @@ let translationX = 50;
 let translationY = 0;
 let translationZ = 0;
 let selectedShape = "Cube";
-let shapeSizeCoefficient = 10;
+let shapeSizeCoefficient = 40;
 let rotationX = 0;
 let rotationY = 0;
 let rotationZ = 0;
@@ -159,11 +159,59 @@ const Seeds = {
   },
 };
 
+function getBackgroundStyle(ctx) {
+  const gradient = ctx.createLinearGradient(0, targetCanvas.height, 0, 0);
+  gradient.addColorStop(0, "#184b8d");
+  gradient.addColorStop(0.25, "#5094e2");
+  gradient.addColorStop(0.5, "#d2eeff");
+  gradient.addColorStop(0.75, "#d2eeff");
+  gradient.addColorStop(1, "#fffff5");
+  return gradient;
+}
+
 const defaultRotationMatrix = [
   [1, 0, 0],
   [0, 1, 0],
   [0, 0, 1],
 ];
+
+function getCentroidForFace(face) {
+  if (face.length < 3) throw new Error("Not enough points to define a face");
+  // https://en.wikipedia.org/wiki/Centroid#Of_a_finite_set_of_points
+  return face.reduce((p0, p1) => p0.add(p1)).multiplyConstant(1 / face.length);
+}
+
+function getNormalForFace(face) {
+  if (face.length < 3) throw new Error("Not enough points to define a face");
+  const p1 = face[0];
+  const pCommon = face[1];
+  const p2 = face[2];
+  const centroid = getCentroidForFace(face);
+  let vec1 = p1.subtract(pCommon);
+  let vec2 = p2.subtract(pCommon);
+  let crossProduct = vec1.cross(vec2).normalized().multiplyConstant(
+    -shapeSizeCoefficient // Makes the face visible when drawn
+  );
+  return crossProduct.add(centroid);
+}
+
+function getScalingMatrix(
+  focalLength,
+  mx = 1, // width of a pixel on the projection plane
+  my = 1, // height of a pixel on the projection plane
+  principalX = 0, // x coordinate of the principle point (center of view in camera plane)
+  principalY = 0,
+) {
+  const u = principalX;
+  const v = principalY;
+  const ax = focalLength / mx;
+  const ay = focalLength / my;
+  return new NDMatrix([
+    [ax, 0, u],
+    [0, ay, v],
+    [0, 0, 1],
+  ]);
+}
 
 function getCameraMatrix(
   focalLength,
@@ -175,15 +223,13 @@ function getCameraMatrix(
   rotationMatrix = defaultRotationMatrix, // the matrix that describes the camera's rotation in world coordinates
   translationVector = new Vector(0, 0, 0), // the vector that describes the camera's translation in world coordinates
 ) {
-  const u = principalX;
-  const v = principalY;
-  const ax = focalLength / mx;
-  const ay = focalLength / my;
-  const scalingMatrix = new NDMatrix([
-    [ax, 0, u],
-    [0, ay, v],
-    [0, 0, 1],
-  ]);
+  const scalingMatrix = getScalingMatrix(
+    focalLength,
+    mx,
+    my,
+    principalX,
+    principalY
+  );
   const f = focalLength;
   const focalMatrix = new NDMatrix([
     [f, 0, 0, 0],
@@ -241,7 +287,7 @@ function projectOntoCameraPlane(
   );
 }
 
-function drawPointOnCanvas(ctx, x, y) {
+function drawPointOnCanvas(ctx, x, y, color = "#000") {
   const radius = 5;
   ctx.beginPath();
   ctx.arc(
@@ -251,30 +297,45 @@ function drawPointOnCanvas(ctx, x, y) {
     0,
     Math.PI * 2,
   );
-  ctx.fillStyle = "#000";
+  ctx.fillStyle = color;
   ctx.fill();
 }
 
-function showPolygon() {
+function drawLineOnCanvas(ctx, x0, y0, x1, y1, color = "#000") {
+  const radius = 5;
+  ctx.beginPath();
+  ctx.moveTo(x0 + (targetCanvas.width/2), y0 + (targetCanvas.height/2));
+  ctx.lineTo(x1 + (targetCanvas.width/2), y1 + (targetCanvas.height/2));
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2
+  ctx.stroke();
+}
+
+function showPolyhedron() {
   const outputVertices = [];
   const shape = Seeds[selectedShape];
   if (!shape) return;
   const shapeRotation = NDMatrix.rotationMatrix(
     rotationX,
     rotationY,
-    rotationZ
+    rotationZ,
   );
+  let rotatedVertices = [];
   shape.vertices.forEach((vertex) => {
     let rotatedVertex = shapeRotation.multiply(
       new NDMatrix([[vertex.x], [vertex.y], [vertex.z]]),
     );
-    let rotatedVertexVector = new Vector(
-      rotatedVertex.m[0][0],
-      rotatedVertex.m[1][0],
-      rotatedVertex.m[2][0],
+    rotatedVertices.push(
+      new Vector(
+        rotatedVertex.m[0][0],
+        rotatedVertex.m[1][0],
+        rotatedVertex.m[2][0],
+      ),
     );
+  });
+  rotatedVertices.forEach((vertex) => {
     const point = projectOntoCameraPlane(
-      rotatedVertexVector,
+      vertex,
       focalDistance,
       1,
       1,
@@ -287,18 +348,87 @@ function showPolygon() {
     outputVertices.push(point);
   });
   const ctx = targetCanvas.getContext("2d");
-  ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+  ctx.fillStyle = getBackgroundStyle(ctx);
+  ctx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
+  
+  // Draw vertices
   outputVertices.forEach((vertex) => {
     drawPointOnCanvas(ctx, vertex.x, vertex.y);
+  });
+
+  const cameraScalingMatrix = getScalingMatrix(
+    focalDistance,
+    1,
+    1,
+    principalX,
+    principalY,
+  );
+  const principalVector = new Vector(
+    cameraScalingMatrix.m[0][2],
+    cameraScalingMatrix.m[1][2],
+    cameraScalingMatrix.m[2][2],
+  );
+  const scaledPrincipalVectorMatrix = cameraScalingMatrix.getInverse().multiply(
+    new NDMatrix(
+      [
+        [0],
+        [0],
+        [1], // Assuming the principal axis is +z
+      ]
+    )
+  );
+  const scaledPrincipalVector = new Vector(
+    scaledPrincipalVectorMatrix.m[0][0],
+    scaledPrincipalVectorMatrix.m[1][0],
+    scaledPrincipalVectorMatrix.m[2][0],
+  );
+
+  // Draw centroids
+  shape.faces.forEach(face => {
+    let verticesForFace = [];
+    face.forEach(vertexIdx => {
+      verticesForFace.push(
+        rotatedVertices[vertexIdx]
+      );
+    });
+    const normalStart = projectOntoCameraPlane(
+      getCentroidForFace(verticesForFace),
+      focalDistance,
+      1,
+      1,
+      principalX,
+      principalY,
+      skewCoefficient,
+      defaultRotationMatrix,
+      new Vector(translationX, translationY, translationZ),
+    );
+    const normalVector = getNormalForFace(verticesForFace);
+    const normalEnd = projectOntoCameraPlane(
+      normalVector,
+      focalDistance,
+      1,
+      1,
+      principalX,
+      principalY,
+      skewCoefficient,
+      defaultRotationMatrix,
+      new Vector(translationX, translationY, translationZ),
+    );
+    if (principalVector.dot(normalVector) > 0) {
+      drawLineOnCanvas(ctx, normalStart.x, normalStart.y, normalEnd.x, normalEnd.y, "#00FF00");
+    }
+    drawPointOnCanvas(ctx, normalStart.x, normalStart.y, "#FF0000");
   });
 }
 
 function resizeCanvas() {
-  targetCanvas.style.background = "#c7ceea";
   targetCanvas.width = window.innerWidth;
   targetCanvas.height = window.innerHeight;
-
-  showPolygon();
+  // Dark blue gradient background
+  const ctx = targetCanvas.getContext("2d");
+  ctx.fillStyle = getBackgroundStyle(ctx);
+  ctx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
+  showPolyhedron();
 }
 
 // Drag handling
@@ -343,29 +473,30 @@ function onMouseMove(e) {
   if (!isDragging) return;
   const dx = e.clientX - dragStartX;
   const dy = e.clientY - dragStartY;
-  const scale = 0.005; // adjust sensitivity
   if (dragMode === "camera") {
-    translationX = startTranslationX + dx * scale;
-    translationY = startTranslationY + dy * scale;
+    const cameraScale = 1.0; // increased sensitivity
+    translationX = startTranslationX + dx * cameraScale;
+    translationY = startTranslationY + dy * cameraScale;
     if (e.shiftKey) {
-      translationZ = startTranslationZ + dy * scale;
+      translationZ = startTranslationZ + dy * cameraScale;
     }
     // Update input controls
     document.getElementById("translationX").value = translationX;
     document.getElementById("translationY").value = translationY;
     document.getElementById("translationZ").value = translationZ;
   } else if (dragMode === "shape") {
-    rotationX = startRotationX + dy * scale;
-    rotationY = startRotationY + dx * scale;
+    const shapeScale = 0.005;
+    rotationX = startRotationX + dy * shapeScale;
+    rotationY = startRotationY + dx * shapeScale;
     if (e.shiftKey) {
-      rotationZ = startRotationZ + dy * scale;
+      rotationZ = startRotationZ + dy * shapeScale;
     }
     // Update input controls
     document.getElementById("rotationX").value = rotationX;
     document.getElementById("rotationY").value = rotationY;
     document.getElementById("rotationZ").value = rotationZ;
   }
-  showPolygon();
+  showPolyhedron();
 }
 
 function onMouseUp() {
@@ -388,7 +519,21 @@ function onWheel(e) {
   focalDistance += delta * 0.01; // sensitivity
   if (focalDistance < 0.1) focalDistance = 0.1;
   document.getElementById("focalDistance").value = focalDistance;
-  showPolygon();
+  showPolyhedron();
 }
 
 targetCanvas.addEventListener("wheel", onWheel);
+
+// Ensure only one details open at a time
+const cameraDetails = document.getElementById("camera-controls");
+const shapeDetails = document.getElementById("shape-controls");
+cameraDetails.addEventListener("toggle", () => {
+  if (cameraDetails.open) {
+    shapeDetails.removeAttribute("open");
+  }
+});
+shapeDetails.addEventListener("toggle", () => {
+  if (shapeDetails.open) {
+    cameraDetails.removeAttribute("open");
+  }
+});
