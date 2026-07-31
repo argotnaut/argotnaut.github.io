@@ -9,7 +9,7 @@ class Camera {
     focalLength = 5,
     principalX = 0,
     principalY = 0,
-    skew = 1,
+    skew = 0,
     mx = 1,
     my = 1,
     rotationMatrix = Camera.defaultRotationMatrix,
@@ -26,13 +26,6 @@ class Camera {
   }
 
   getCameraMatrix() {
-    const scalingMatrix = this.getScalingMatrix(
-      this.focalLength,
-      this.mx,
-      this.my,
-      this.principalX,
-      this.principalY,
-    );
     const f = this.focalLength;
     const focalMatrix = new NDMatrix([
       [f, 0, 0, 0],
@@ -49,7 +42,7 @@ class Camera {
       [r[2][0], r[2][1], r[2][2], tz],
       [0, 0, 0, 1],
     ]);
-    return scalingMatrix
+    return this.getScalingMatrix()
       .multiply(focalMatrix)
       .multiply(extrinsicParameters.getInverse());
   }
@@ -57,10 +50,11 @@ class Camera {
   getScalingMatrix() {
     const u = this.principalX;
     const v = this.principalY;
+    const s = this.skew;
     const ax = this.focalLength / this.mx;
     const ay = this.focalLength / this.my;
     return new NDMatrix([
-      [ax, 0, u],
+      [ax, s, u],
       [0, ay, v],
       [0, 0, 1],
     ]);
