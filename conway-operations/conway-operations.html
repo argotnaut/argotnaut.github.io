@@ -24,10 +24,10 @@
   <details id="shape-controls" open>
     <summary>Shape Controls</summary>
     <select id="shape">
+      <option value="tetragon">Tetragon</option>
       <option value="cube">Cube</option>
       <option value="octahedron">Octahedron</option>
       <option value="icosahedron">Icosahedron</option>
-      <option value="tetragon">Tetragon</option>
     </select>
     <div id="rotation-controls">
       <label>Rotation X: <input type="number" id="rotationX" step="0.1" value="0"></label>
@@ -46,6 +46,7 @@
     <script>
   function initControls() {
     const shapeSelect = document.getElementById('shape');
+    shapeSelect.value = "icosahedron";
     const controls = {
       focalDistance: document.getElementById('focalDistance'),
       principalX: document.getElementById('principalX'),

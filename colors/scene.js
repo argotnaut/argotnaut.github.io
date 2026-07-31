@@ -180,7 +180,12 @@ class Scene {
         const normalVector = renderables[i].getNormal(normalScale);
         let color = "#FF0000";
         if (principalVector.dot(normalVector) > 0) {
-          this.drawPolygonOnCanvas(element);
+          const rgb = hexToRgb(color);
+          const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+          hsl.l *= Math.max(0.1, -(normalVector.y-50) / normalVector.magnitude());
+          const newRGB = hslToRgb(hsl.h, hsl.s, hsl.l);
+          const newHex = hslToHex(hsl.h, hsl.s, hsl.l)+"AA";
+          this.drawPolygonOnCanvas(element, newHex);
           color = "#00FF00"
         }
         this.drawPointOnCanvas(centroid.x, centroid.y, color);
