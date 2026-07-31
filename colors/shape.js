@@ -1,5 +1,16 @@
 const normalScale = 40;
 
+class Line {
+  constructor(start, end) {
+    this.start = start;
+    this.end = end;
+  }
+
+  getRenderables() {
+    return this;
+  }
+}
+
 class Face {
   constructor(vertexCoordinates) {
     if (vertexCoordinates.length < 3)
@@ -26,6 +37,10 @@ class Face {
     );
     return crossProduct.add(centroid);
   }
+
+  getRenderables() {
+    return this;
+  }
 }
 
 class Shape {
@@ -41,44 +56,8 @@ class Shape {
     this.translationVector = translationVector;
   }
 
-  getFaceVerticesFromList(vertices) {
-    let outputFaces = [];
-    this.faces.forEach((face) => {
-      let verticesForFace = [];
-      face.forEach((vertexIdx) => {
-        verticesForFace.push(vertices[vertexIdx]);
-      });
-      outputFaces.push(verticesForFace);
-    });
-    return outputFaces;
-  }
-
-  static drawLineOnCanvas(context, x0, y0, x1, y1, color = "#000") {
-    const radius = 5;
-    context.beginPath();
-    context.moveTo(x0 + targetCanvas.width / 2, y0 + targetCanvas.height / 2);
-    context.lineTo(x1 + targetCanvas.width / 2, y1 + targetCanvas.height / 2);
-    context.strokeStyle = color;
-    context.lineWidth = 2;
-    context.stroke();
-  }
-
-  static drawPointOnCanvas(ctx, x, y, color = "#000") {
-    const radius = 5;
-    ctx.beginPath();
-    ctx.arc(
-      x + targetCanvas.width / 2,
-      y + targetCanvas.height / 2,
-      radius,
-      0,
-      Math.PI * 2,
-    );
-    ctx.fillStyle = color;
-    ctx.fill();
-  }
-
   getVertices() {
-    let rotatedVertices = [];
+    var rotatedVertices = [];
     this.vertices.forEach((vertex) => {
       let rotatedVertex = this.rotationMatrix.multiply(
         new NDMatrix([[vertex.x], [vertex.y], [vertex.z]]),
@@ -95,7 +74,7 @@ class Shape {
   }
 
   getFaces() {
-    let output = [];
+    var output = [];
     this.faces.forEach((face) => {
       let faceVertices = [];
       let oldVertices = this.getVertices();
@@ -105,63 +84,18 @@ class Shape {
     return output;
   }
 
-  render(canvas, context, camera) {
-    const projectedVertices = [];
+  getRenderables() {
+    // // Draw centroids and normal lines
+    // var centroids = [];
+    // var normals = [];
+    // this.getFaces().forEach((face) => {
+    //   var centroid = face.getCentroid();
+    //   var normalVector = face.getNormal(normalScale);
+    //   centroids.push(centroid);
+    //   normals.push(new Line(normalVector, centroid))
+    // });
 
-    this.getVertices().forEach((vertex) => {
-      const point = camera.projectOntoCameraPlane(vertex);
-      projectedVertices.push(point);
-    });
-
-    // Draw vertices
-    projectedVertices.forEach((vertex) => {
-      Shape.drawPointOnCanvas(context, vertex.x, vertex.y);
-    });
-
-    const cameraScalingMatrix = camera.getScalingMatrix();
-    const principalVector = new Vector(
-      cameraScalingMatrix.m[0][2],
-      cameraScalingMatrix.m[1][2],
-      cameraScalingMatrix.m[2][2],
-    );
-    const scaledPrincipalVectorMatrix = cameraScalingMatrix
-      .getInverse()
-      .multiply(
-        new NDMatrix([
-          [0],
-          [0],
-          [1], // Assuming the principal axis is +z
-        ]),
-      );
-    const scaledPrincipalVector = new Vector(
-      scaledPrincipalVectorMatrix.m[0][0],
-      scaledPrincipalVectorMatrix.m[1][0],
-      scaledPrincipalVectorMatrix.m[2][0],
-    );
-
-    // Draw centroids
-    this.getFaces().forEach((face) => {
-      const normalStart = camera.projectOntoCameraPlane(
-        face.getCentroid(),
-      );
-      const normalVector = face.getNormal(normalScale);
-      const normalEnd = camera.projectOntoCameraPlane(normalVector);
-      if (principalVector.dot(normalVector) > 0) {
-        Shape.drawLineOnCanvas(
-          context,
-          normalStart.x,
-          normalStart.y,
-          normalEnd.x,
-          normalEnd.y,
-          "#00FF00",
-        );
-      }
-      Shape.drawPointOnCanvas(
-        context,
-        normalStart.x,
-        normalStart.y,
-        "#FF0000",
-      );
-    });
+    // return this.getVertices().concat(centroids, normals)
+    return this.getFaces();
   }
 }

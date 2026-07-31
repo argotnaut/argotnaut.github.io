@@ -42,6 +42,20 @@ class Vector {
   }
 
   /**
+   * Returns the distance between this vector and another
+   *
+   * @param {Vector} other  – The other vector
+   * @returns {Number}  The straight‑line distance between the two points.
+   */
+  distanceTo(other) {
+    return Math.sqrt(
+      (other.x - this.x) ** 2 +
+        (other.y - this.y) ** 2 +
+        (other.z - this.z) ** 2,
+    );
+  }
+
+  /**
    * Returns the cross product of this vector with another.
    * @param {Vector} other
    * @returns {Vector}
