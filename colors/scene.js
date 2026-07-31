@@ -176,9 +176,6 @@ class Scene {
           element.end.y,
         );
       } else if (isFace(element)) {
-        element.vertexCoordinates.forEach((vertex) => {
-          this.drawPointOnCanvas(vertex.x, vertex.y);
-        });
         const centroid = element.getCentroid();
         const normalVector = renderables[i].getNormal(normalScale);
         let color = "#FF0000";
@@ -187,6 +184,9 @@ class Scene {
           color = "#00FF00"
         }
         this.drawPointOnCanvas(centroid.x, centroid.y, color);
+        element.vertexCoordinates.forEach((vertex) => {
+          this.drawPointOnCanvas(vertex.x, vertex.y);
+        });
       }
     }
   }
