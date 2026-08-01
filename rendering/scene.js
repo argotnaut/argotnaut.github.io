@@ -57,36 +57,34 @@ class Scene {
     const radius = 5;
     this.context.beginPath();
     const originAdjusted = (x, y) => {
-        return {
-            x: x + this.canvas.width / 2,
-            y: y + this.canvas.height / 2
-        };
+      return {
+        x: x + this.canvas.width / 2,
+        y: y + this.canvas.height / 2,
+      };
     };
     const vertices = face.vertexCoordinates;
-    const initialPoint = originAdjusted(
-        vertices[0].x,
-        vertices[0].y
-    );
-    this.context.moveTo(
-      initialPoint.x,
-      initialPoint.y,
-    );
+    const initialPoint = originAdjusted(vertices[0].x, vertices[0].y);
+    this.context.moveTo(initialPoint.x, initialPoint.y);
     for (let i = 1; i < vertices.length; i++) {
-        const vertex = originAdjusted(
-            vertices[i].x,
-            vertices[i].y
-        );
-        this.context.lineTo(
-          vertex.x,
-          vertex.y,
-        );
+      const vertex = originAdjusted(vertices[i].x, vertices[i].y);
+      this.context.lineTo(vertex.x, vertex.y);
     }
     this.context.strokeStyle = strokeColor;
     this.context.lineWidth = 2;
-    this.context.fillStyle = fillColor
+    this.context.fillStyle = fillColor;
     this.context.closePath();
     this.context.stroke();
     this.context.fill();
+  }
+
+  drawTextOnCanvas(text, x, y, fillColor = "#000") {
+    this.context.font = "20px serif";
+    this.context.fillStyle = fillColor;
+    this.context.fillText(
+      text,
+      x + this.canvas.width / 2,
+      y + this.canvas.height / 2,
+    );
   }
 
   render() {
@@ -182,11 +180,14 @@ class Scene {
         if (principalVector.dot(normalVector) > 0) {
           const rgb = hexToRgb(color);
           const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-          hsl.l *= Math.max(0.1, -(normalVector.y-50) / normalVector.magnitude());
+          hsl.l *= Math.max(
+            0.1,
+            -(normalVector.y - 50) / normalVector.magnitude(),
+          );
           const newRGB = hslToRgb(hsl.h, hsl.s, hsl.l);
-          const newHex = hslToHex(hsl.h, hsl.s, hsl.l)+"AA";
+          const newHex = hslToHex(hsl.h, hsl.s, hsl.l) + "AA";
           this.drawPolygonOnCanvas(element, newHex);
-          color = "#00FF00"
+          color = "#00FF00";
         }
         this.drawPointOnCanvas(centroid.x, centroid.y, color);
         element.vertexCoordinates.forEach((vertex) => {

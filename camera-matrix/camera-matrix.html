@@ -2,9 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Conway polyhedra notation</title>
+    <title>Camera Matrix</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="conway-operations.css" />
+    <link rel="stylesheet" href="camera-matrix.css" />
   </head>
   <body>
     <canvas id="canvas"></canvas>
@@ -51,7 +51,6 @@
       <details id="shape-controls" open>
         <summary>Shape Controls</summary>
         <select id="shape">
-          <option value="star">Star</option>
           <option value="tetragon">Tetragon</option>
           <option value="cube">Cube</option>
           <option value="octahedron">Octahedron</option>
@@ -80,11 +79,11 @@
     <script src="../rendering/shape.js"></script>
     <script src="../rendering/camera.js"></script>
     <script src="../rendering/scene.js"></script>
-    <script src="conway-operations.js"></script>
+    <script src="camera-matrix.js"></script>
     <script>
       function initControls() {
         const shapeSelect = document.getElementById("shape");
-        shapeSelect.value = "dodecahedron";
+        shapeSelect.value = "icosahedron";
         const controls = {
           focalDistance: document.getElementById("focalDistance"),
           principalX: document.getElementById("principalX"),
