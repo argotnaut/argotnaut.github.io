@@ -57,20 +57,20 @@ class Shape {
   }
 
   getVertices() {
-    var rotatedVertices = [];
+    var transformedVertices = [];
     this.vertices.forEach((vertex) => {
       let rotatedVertex = this.rotationMatrix.multiply(
         new NDMatrix([[vertex.x], [vertex.y], [vertex.z]]),
       );
-      rotatedVertices.push(
+      transformedVertices.push(
         new Vector(
-          rotatedVertex.m[0][0],
-          rotatedVertex.m[1][0],
-          rotatedVertex.m[2][0],
+          rotatedVertex.m[0][0] + this.translationVector.x,
+          rotatedVertex.m[1][0] + this.translationVector.y,
+          rotatedVertex.m[2][0] + this.translationVector.z,
         ),
       );
     });
-    return rotatedVertices;
+    return transformedVertices;
   }
 
   getFaces() {
@@ -85,17 +85,6 @@ class Shape {
   }
 
   getRenderables() {
-    // // Draw centroids and normal lines
-    // var centroids = [];
-    // var normals = [];
-    // this.getFaces().forEach((face) => {
-    //   var centroid = face.getCentroid();
-    //   var normalVector = face.getNormal(normalScale);
-    //   centroids.push(centroid);
-    //   normals.push(new Line(normalVector, centroid))
-    // });
-
-    // return this.getVertices().concat(centroids, normals)
     return this.getFaces();
   }
 }

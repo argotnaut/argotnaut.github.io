@@ -29,4 +29,17 @@ class LinkedList {
     this.length++;
     return node;
   }
+
+  asArray() {
+    let output = []
+    if (this.head == null || this.length < 1) return output;
+    let current_item = this.head;
+    let num_items = 0;
+    do {
+      output.push(current_item.value);
+      current_item = current_item.next;
+      num_items++
+    } while (num_items < this.length);
+    return output
+  }
 }
