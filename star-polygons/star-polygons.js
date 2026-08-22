@@ -130,7 +130,6 @@ function render(inputScene) {
 }
 
 function getSchlafliPolygon(p, q, r, s) {
-  // TODO: put this in a for-loop for the different faces determined by r
   const angle = (Math.PI * 2) / p;
   let points = new LinkedList();
 
@@ -180,6 +179,12 @@ function getHeightOfFace(faceSideLength, faceInteriorAngle) {
  * @returns {number} θ in radians, or NaN if the value is outside [-1,1] (no real solution).
  */
 function getTiltAngle(polygonsAngle, interiorAngle) {
+  if (
+    polygonsAngle.toPrecision(8) == interiorAngle.toPrecision(8)
+    || polygonsAngle < interiorAngle
+  ) {
+    return 0;
+  }
   // Half‑angles
   const a2 = polygonsAngle / 2;
   const g2 = interiorAngle / 2;
@@ -205,17 +210,15 @@ function getShapeFromSchlafliSymbol(points, hops, numberOfPolygons, n) {
   const shape = getSchlafliPolygon(points, hops);
   const polygonsAngle = (Math.PI * 2) / numberOfPolygons;
   const interiorAngle = interiorAngleForFace(points, hops);
-  // const suppliment = ((Math.PI) - interiorAngle);
-  // const compensationAngle = polygonsAngle - interiorAngle
-  const rotationAngle = ((polygonsAngle) * n);
-  const v0 = shape.getFaces()[0].vertexCoordinates[0];
-  const v1 = shape.getFaces()[0].vertexCoordinates[1];
-  const sideLength = v0.distanceTo(v1);
+  let compensationAngle = 0
+  if (polygonsAngle < interiorAngle) {
+    compensationAngle = polygonsAngle - interiorAngle;
+  }
+  let rotationAngle = ((polygonsAngle-compensationAngle) * n);
   const tiltAngle = getTiltAngle(
     polygonsAngle,
     interiorAngle
   );
-  console.log(tiltAngle);
   shape.rotationMatrix = NDMatrix.rotationMatrix(0, tiltAngle, rotationAngle);
   shape.translationVector = new Vector(
     shape.translationVector.x +
@@ -238,15 +241,24 @@ function renderScene() {
   const numberOfPolygons = parseInt(document.getElementById("numberOfPolygons").value) || 4;
   const polygonTurningNumber = parseInt(document.getElementById("polygonTurningNumber").value) || 1;
 
-  let shapes = [];
-
+  let shape = new Shape([], [], Camera.defaultRotationMatrix, new Vector(0,0,0));
   for (let n = 1; n <= numberOfPolygons; n++) {
     const newShape = getShapeFromSchlafliSymbol(points, hops, numberOfPolygons, n)
-    shapes.push(newShape);
+    const newVertices = newShape.getVertices();
+    newShape.faces.forEach(face => {
+      let adjustedvertexIdxs = [];
+      face.forEach(vert => adjustedvertexIdxs.push(vert+shape.vertices.length));
+      shape.faces.push(adjustedvertexIdxs);
+    });
+    shape.vertices.push(...newVertices);
   }
+  shape.rotationMatrix = NDMatrix.rotationMatrix(
+    rotationX,
+    rotationY,
+    rotationZ
+  );
 
-
-  let scene = new Scene(camera, shapes, targetCanvas, targetCanvasContext);
+  let scene = new Scene(camera, [shape], targetCanvas, targetCanvasContext);
   render(scene);
 }
 
