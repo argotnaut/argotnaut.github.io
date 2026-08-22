@@ -157,6 +157,76 @@ function interiorAngleForFace(p, q) {
   return Math.PI - ((Math.PI * 2 * q) / p);
 }
 
+function toDegrees(rads) {
+  return (rads / (2*Math.PI))*360;
+}
+
+function getHeightOfFace(faceSideLength, faceInteriorAngle) {
+  const apothem = (faceSideLength*Math.tan(faceInteriorAngle/2))/2;
+  const circumradius = faceSideLength / (2*Math.cos(faceInteriorAngle/2));
+  return apothem + circumradius;
+}
+
+/**
+ * Compute the angle θ from given γ and α using the relation:
+ * cos(γ/2) = cos(α/2) / sqrt(cos²θ + cos²(α/2) sin²θ).
+ *
+ * Derived formula:
+ *   cosθ = cot(α/2) * tan(γ/2)
+ *   θ   = arccos(cosθ)
+ *
+ * @param {number} polygonsAngle - Angle α in radians.
+ * @param {number} interiorAngle - Angle γ in radians.
+ * @returns {number} θ in radians, or NaN if the value is outside [-1,1] (no real solution).
+ */
+function getTiltAngle(polygonsAngle, interiorAngle) {
+  // Half‑angles
+  const a2 = polygonsAngle / 2;
+  const g2 = interiorAngle / 2;
+
+  // Compute cot(a2) * tan(g2)
+  const sinA2 = Math.sin(a2);
+  const cosA2 = Math.cos(a2);
+  const sinG2 = Math.sin(g2);
+  const cosG2 = Math.cos(g2);
+
+  // Avoid division by zero
+  if (sinA2 === 0) return NaN;
+
+  const cosTheta = (cosA2 / sinA2) * (sinG2 / cosG2);
+
+  // Clamp to [-1,1] to guard against numerical errors
+  if (cosTheta < -1 || cosTheta > 1) return NaN;
+
+  return Math.acos(cosTheta);
+}
+
+function getShapeFromSchlafliSymbol(points, hops, numberOfPolygons, n) {
+  const shape = getSchlafliPolygon(points, hops);
+  const polygonsAngle = (Math.PI * 2) / numberOfPolygons;
+  const interiorAngle = interiorAngleForFace(points, hops);
+  // const suppliment = ((Math.PI) - interiorAngle);
+  // const compensationAngle = polygonsAngle - interiorAngle
+  const rotationAngle = ((polygonsAngle) * n);
+  const v0 = shape.getFaces()[0].vertexCoordinates[0];
+  const v1 = shape.getFaces()[0].vertexCoordinates[1];
+  const sideLength = v0.distanceTo(v1);
+  const tiltAngle = getTiltAngle(
+    polygonsAngle,
+    interiorAngle
+  );
+  console.log(tiltAngle);
+  shape.rotationMatrix = NDMatrix.rotationMatrix(0, tiltAngle, rotationAngle);
+  shape.translationVector = new Vector(
+    shape.translationVector.x +
+      Math.cos(rotationAngle) * -(shapeSizeCoefficient*(Math.cos(tiltAngle))),
+    shape.translationVector.y +
+      Math.sin(rotationAngle) * -(shapeSizeCoefficient*(Math.cos(tiltAngle))),
+    shape.translationVector.z,
+  );
+  return shape;
+}
+
 function renderScene() {
   targetCanvas.width = window.innerWidth;
   targetCanvas.height = window.innerHeight;
@@ -164,29 +234,17 @@ function renderScene() {
 
   const points = parseFloat(document.getElementById("points").value);
   const hops = parseFloat(document.getElementById("hops").value);
-  // DEBUG: this is temporarily hard-coded for debugging purposes
-  const numberOfPolygons = 4;
-  const polygonTurningNumber = 1;
+  // Get dynamic parameters from UI
+  const numberOfPolygons = parseInt(document.getElementById("numberOfPolygons").value) || 4;
+  const polygonTurningNumber = parseInt(document.getElementById("polygonTurningNumber").value) || 1;
 
   let shapes = [];
-  const polygonsAngle = (Math.PI * 2) / numberOfPolygons;
 
   for (let n = 1; n <= numberOfPolygons; n++) {
-    const shape = getSchlafliPolygon(points, hops);
-    const interiorAngle = interiorAngleForFace(points, hops);
-    const suppliment = ((Math.PI) - interiorAngle);
-    const compensationAngle = polygonsAngle - interiorAngle
-    const rotationAngle = ((polygonsAngle-compensationAngle) * n);
-    shape.rotationMatrix = NDMatrix.rotationMatrix(0, 0, rotationAngle);
-    shape.translationVector = new Vector(
-      shape.translationVector.x +
-        Math.cos(rotationAngle) * -shapeSizeCoefficient,
-      shape.translationVector.y +
-        Math.sin(rotationAngle) * -shapeSizeCoefficient,
-      shape.translationVector.z,
-    );
-    shapes.push(shape);
+    const newShape = getShapeFromSchlafliSymbol(points, hops, numberOfPolygons, n)
+    shapes.push(newShape);
   }
+
 
   let scene = new Scene(camera, shapes, targetCanvas, targetCanvasContext);
   render(scene);
