@@ -4,7 +4,7 @@ const pointsInput = document.getElementById("points");
 const hopsInput = document.getElementById("hops");
 
 // Scene rendering globals
-const camera = new Camera();
+const camera = new PerspectiveCamera();
 camera.focalLength = 50;
 camera.translationVector.y = 0;
 camera.translationVector.x = 0;
@@ -207,18 +207,20 @@ function getTiltAngle(polygonsAngle, interiorAngle) {
 }
 
 function getShapeFromSchlafliSymbol(points, hops, numberOfPolygons, n) {
+  const closeDefect = document.getElementById("closeDefectAngle").checked;
   const shape = getSchlafliPolygon(points, hops);
   const polygonsAngle = (Math.PI * 2) / numberOfPolygons;
   const interiorAngle = interiorAngleForFace(points, hops);
   let compensationAngle = 0
-  if (polygonsAngle < interiorAngle) {
+  if (polygonsAngle < interiorAngle || !closeDefect) {
     compensationAngle = polygonsAngle - interiorAngle;
   }
   let rotationAngle = ((polygonsAngle-compensationAngle) * n);
-  const tiltAngle = getTiltAngle(
+  const tiltAngle = closeDefect ? getTiltAngle(
     polygonsAngle,
     interiorAngle
-  );
+  ) : 0;
+
   shape.rotationMatrix = NDMatrix.rotationMatrix(0, tiltAngle, rotationAngle);
   shape.translationVector = new Vector(
     shape.translationVector.x +
@@ -241,7 +243,7 @@ function renderScene() {
   const numberOfPolygons = parseInt(document.getElementById("numberOfPolygons").value) || 4;
   const polygonTurningNumber = parseInt(document.getElementById("polygonTurningNumber").value) || 1;
 
-  let shape = new Shape([], [], Camera.defaultRotationMatrix, new Vector(0,0,0));
+  let shape = new Shape([], [], PerspectiveCamera.defaultRotationMatrix, new Vector(0,0,0));
   for (let n = 1; n <= numberOfPolygons; n++) {
     const newShape = getShapeFromSchlafliSymbol(points, hops, numberOfPolygons, n)
     const newVertices = newShape.getVertices();

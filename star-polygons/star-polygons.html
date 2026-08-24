@@ -15,6 +15,7 @@
     <label>Turning number: <input type="number" inputmode="numeric" id="hops" min="1" value="1" /></label>
     <label>Number of polygons: <input type="number" inputmode="numeric" id="numberOfPolygons" min="1" value="3" /></label>
     <label>Polygon turning number: <input type="number" inputmode="numeric" id="polygonTurningNumber" min="1" value="1" /></label>
+    <label>Close defect angle: <input type="checkbox" id="closeDefectAngle" checked /></label>
   </div>
   <script src="../rendering/color.js"></script>
   <script src="../rendering/vector.js"></script>
@@ -30,7 +31,8 @@
         points: document.getElementById("points"),
         hops: document.getElementById("hops"),
         numberOfPolygons: document.getElementById("numberOfPolygons"),
-        polygonTurningNumber: document.getElementById("polygonTurningNumber")
+        polygonTurningNumber: document.getElementById("polygonTurningNumber"),
+        closeDefectAngle: document.getElementById("closeDefectAngle")
       };
       for (const key in controls) {
         controls[key].addEventListener("input", renderScene);
