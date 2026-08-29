@@ -1,6 +1,8 @@
 const targetCanvas = document.getElementById("canvas");
 const targetCanvasContext = targetCanvas.getContext("2d");
-const camera = new Camera();
+let camera = new PerspectiveCamera();
+
+// Camera will be re-initialized based on projection type selection
 // Global constants for polygon projection
 // Camera and shape parameters
 let selectedShape = "Cube";
@@ -264,13 +266,7 @@ function onMouseDown(e) {
     startRotationX = rotationX;
     startRotationY = rotationY;
     startRotationZ = rotationZ;
-  } else if (cameraOpen) {
-    dragMode = "camera";
-    startTranslationX = camera.translationVector.x;
-    startTranslationY = camera.translationVector.y;
-    startTranslationZ = camera.translationVector.z;
   } else {
-    // Default to camera if none open
     dragMode = "camera";
     startTranslationX = camera.translationVector.x;
     startTranslationY = camera.translationVector.y;

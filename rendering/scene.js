@@ -10,7 +10,7 @@ class Scene {
   }
 
   constructor(
-    camera = new Camera(),
+    camera = new PerspectiveCamera(),
     elements,
     canvas,
     context,

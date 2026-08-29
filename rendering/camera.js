@@ -1,4 +1,63 @@
-class Camera {
+class OrthographicCamera {
+  constructor(
+    left, right, bottom, top, near, far
+  ) {
+    this.left = left;
+    this.right = right;
+    this.bottom = bottom;
+    this.top = top;
+    this.near = near;
+    this.far = far;
+    this.rotationMatrix = 
+    this.rotationMatrix = new NDMatrix([
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+    ]);
+    this.translationVector = new Vector(0, 0, 0);
+  }
+
+  getCameraMatrix() {
+    const ax = 2;
+    const ay = 2;
+    const az = 2;
+    const tx = -((this.right+this.left))
+    const ty = -((this.top+this.bottom))
+    const tz = -((this.far+this.near))
+    return new NDMatrix([
+      [ax, 0, 0, tx],
+      [0, ay, 0, ty],
+      [0, 0, az, tz],
+      [0, 0, 0, 1]
+    ]);
+  }
+
+  getScalingMatrix() {
+    return new NDMatrix([
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+    ]);
+  }
+
+  projectOntoCameraPlane(inputVector) {
+    const outputMatrix = this.getCameraMatrix().multiply(
+      new NDMatrix([[inputVector.x], [inputVector.y], [inputVector.z], [1]]),
+    );
+    const output3Vector = [
+      outputMatrix.m[0][0],
+      outputMatrix.m[1][0],
+      outputMatrix.m[2][0],
+    ];
+    return new Vector(
+      output3Vector[0] / output3Vector[2],
+      output3Vector[1] / output3Vector[2],
+      0,
+    );
+  }
+}
+
+class PerspectiveCamera {
   static defaultRotationMatrix = new NDMatrix([
     [1, 0, 0],
     [0, 1, 0],
@@ -12,7 +71,7 @@ class Camera {
     skew = 0,
     mx = 1,
     my = 1,
-    rotationMatrix = Camera.defaultRotationMatrix,
+    rotationMatrix = PerspectiveCamera.defaultRotationMatrix,
     translationVector = new Vector(50, 0, 0),
   ) {
     this.focalLength = focalLength;
@@ -24,6 +83,8 @@ class Camera {
     this.rotationMatrix = rotationMatrix;
     this.translationVector = translationVector;
   }
+
+
 
   getCameraMatrix() {
     const f = this.focalLength;

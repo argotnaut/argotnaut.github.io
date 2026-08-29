@@ -47,7 +47,7 @@ class Shape {
   constructor(
     vertices,
     faces,
-    rotationMatrix = Camera.defaultRotationMatrix,
+    rotationMatrix = PerspectiveCamera.defaultRotationMatrix,
     translationVector = new Vector(0, 0, 0),
   ) {
     this.vertices = vertices;

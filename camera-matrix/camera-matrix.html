@@ -22,6 +22,13 @@
               max="100"
               value="50"
           /></label>
+        <label
+            >Projection Type:
+            <select id="projectionType">
+              <option value="perspective" selected>Perspective</option>
+              <option value="orthographic">Orthographic</option>
+            </select>
+          </label>
           <label
             >Principal X:
             <input type="number" id="principalX" step="0.1" value="0"
@@ -85,6 +92,7 @@
         const shapeSelect = document.getElementById("shape");
         shapeSelect.value = "icosahedron";
         const controls = {
+          projectionType: document.getElementById("projectionType"),
           focalDistance: document.getElementById("focalDistance"),
           principalX: document.getElementById("principalX"),
           principalY: document.getElementById("principalY"),
@@ -96,6 +104,26 @@
           rotationY: document.getElementById("rotationY"),
           rotationZ: document.getElementById("rotationZ"),
         };
+        // Initialize camera based on projection type
+        const setCamera = () => {
+          const type = controls.projectionType.value;
+          const oldCamera = camera;
+          if (type === "orthographic") {
+            camera = new OrthographicCamera(1, -1, 1, -1, 1, -1);
+          } else {
+            camera = new PerspectiveCamera();
+          }
+          // Preserve all properties from the old camera
+          Object.assign(camera, oldCamera);
+        };
+        setCamera();
+
+        // Listen for projection type changes
+        controls.projectionType.addEventListener("change", () => {
+          setCamera();
+          renderScene();
+        });
+
         const update = () => {
           camera.focalLength = parseFloat(controls.focalDistance.value);
           camera.principalX = parseFloat(controls.principalX.value);

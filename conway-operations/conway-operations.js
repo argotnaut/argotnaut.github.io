@@ -1,10 +1,10 @@
 const targetCanvas = document.getElementById("canvas");
 const targetCanvasContext = targetCanvas.getContext("2d");
-const camera = new Camera();
 // Global constants for polygon projection
 // Camera and shape parameters
 let selectedShape = "Cube";
 let shapeSizeCoefficient = 40;
+const camera = new PerspectiveCamera();
 // Shape rotation
 let rotationX = 0;
 let rotationY = 0;
