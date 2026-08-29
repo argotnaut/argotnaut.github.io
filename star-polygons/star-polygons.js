@@ -4,7 +4,7 @@ const pointsInput = document.getElementById("points");
 const hopsInput = document.getElementById("hops");
 
 // Scene rendering globals
-const camera = new PerspectiveCamera();
+const camera = new Camera();
 camera.focalLength = 50;
 camera.translationVector.y = 0;
 camera.translationVector.x = 0;
@@ -243,7 +243,7 @@ function renderScene() {
   const numberOfPolygons = parseInt(document.getElementById("numberOfPolygons").value) || 4;
   const polygonTurningNumber = parseInt(document.getElementById("polygonTurningNumber").value) || 1;
 
-  let shape = new Shape([], [], PerspectiveCamera.defaultRotationMatrix, new Vector(0,0,0));
+  let shape = new Shape([], [], Camera.defaultRotationMatrix, new Vector(0,0,0));
   for (let n = 1; n <= numberOfPolygons; n++) {
     const newShape = getShapeFromSchlafliSymbol(points, hops, numberOfPolygons, n)
     const newVertices = newShape.getVertices();
